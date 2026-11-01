@@ -1,66 +1,97 @@
-# Darren - Project Portfolio Page
+# Darren's Project Portfolio Page
+
+### Project: ScheduleFlow
+
+<!-- @@author Darren50 -->
 
 ## Overview
 
-ScheduleFlow is a Java 25 command-line application that helps university students plan coursework around deadlines and fixed commitments. Students record tasks and commitments, generate a study plan within their available hours, and continue from saved data in later sessions.
+ScheduleFlow is a Java 25 command-line application that helps university students
+manage coursework, fixed commitments and study time. It generates study plans in
+30-minute slots, explains work that cannot fit before its deadline, and saves
+records and frozen plans for later sessions.
 
 ## Summary of Contributions
 
-**Code contributed:** [RepoSense code view][reposense] | [GitHub profile][github].
+Given below are my contributions to the project.
 
-My main contribution was the commitment feature: the `Commitment` model and `CommitmentService` operations for adding, editing, skipping, deleting and listing fixed commitments, including date-bounded and one-time commitments. I also implemented the service side of multi-date unavailable periods and maintain the command dispatcher under the team's whole-file allocation.
+- **New Feature: Added recurring commitments**
+  ([PR #23][pr23], [PR #26][pr26], [PR #34][pr34], [PR #70][pr70]).
+  - **What it does:** Adds, deletes and lists weekly commitments such as lectures
+    and tutorials. Records receive stable `C` IDs that are never reused, and
+    listing groups them by weekday and start time.
+  - **Justification:** A realistic study plan must reserve time when the student
+    is already busy.
+  - **Highlights:** Operations return immutable candidate snapshots so changes
+    can be saved before publication. Overlap errors report every conflicting
+    commitment in start-time order, while adjacent intervals remain valid.
+    Added preconditions, assertions, Javadoc and opt-in diagnostics that omit
+    commitment names and schedules.
 
-### Recurring commitments
+- **New Feature: Added commitment editing date bounds and skipped occurrences**
+  ([PR #71][pr71], [PR #78][pr78], [PR #79][pr79]).
+  - **What it does:** Edits selected fields without changing the ID, bounds a
+    series with `from/` and `until/`, and cancels one occurrence with
+    `commitment skip`.
+  - **Justification:** Students can correct class times, limit classes to a
+    semester and reclaim cancelled sessions without deleting a whole series.
+  - **Highlights:** Validates the complete replacement and excludes only the
+    edited record from conflict checks. Compares actual calendar occurrences,
+    allowing different semesters to share a weekly slot and skipped dates to
+    free capacity. Date bounds and skips retain compatibility with older files.
 
-- **What it does:** [`CommitmentService`][service] adds, deletes and lists weekly commitments such as lectures and tutorials. Each addition gets a stable `C` ID that is never reused, and listing groups commitments by weekday in start-time order.
-- **Justification:** The planner can only produce a realistic schedule if it knows when the student is already busy.
-- **Highlights:** Every operation returns a new candidate snapshot and never changes its source, so the dispatcher can save before publishing. Overlap errors report every conflicting commitment in start-time order instead of only the first, so students can fix a clash in one attempt. Adjacent intervals are allowed. I added opt-in `FINE` diagnostics that omit names and schedules, assertions for candidate invariants, and Javadoc. See [PR #23][pr23], [PR #26][pr26], [PR #34][pr34] and [PR #70][pr70].
+- **New Feature: Added one-time commitments and multi-date unavailable periods**
+  ([PR #80][pr80], [PR #86][pr86], [PR #126][pr126]).
+  - **What it does:** Blocks a single date, a continuous interval across dates,
+    or the same daily window over a date range.
+  - **Justification:** Meetings, trips and appointments should reserve only
+    their actual dates rather than repeating every week.
+  - **Highlights:** Represents one-time events through equal start/end dates,
+    reusing calendar overlap and planning logic. Continuous ranges split at
+    midnight; daily ranges expand into dated commitments. The dispatcher
+    prepares confirmation, saves the complete batch once, then publishes it.
+    Conflicts or failed saves preserve the previous plan and retry IDs.
 
-### Editing, date bounds and skipped occurrences
+- **Code contributed:** [RepoSense code dashboard][reposense]. My area comprises
+  `Commitment`, `CommitmentService` and `CommandDispatcher`, plus their tests.
 
-- **What it does:** `commitment edit` changes any subset of fields while keeping the ID. Optional `from/` and `until/` dates limit a series to a semester. `commitment skip` cancels one occurrence without touching the rest of the series.
-- **Justification:** Before editing existed, changing a lecture time meant deleting and re-adding it, which changed its ID. Semester-bounded classes otherwise blocked study time forever, and one cancelled class blocked a whole week's slot.
-- **Highlights:** An edit validates the complete replacement and excludes only the target from overlap checks. Overlap checking compares actual calendar occurrences, so two semesters can reuse the same weekly slot, and a skipped date frees that time for another commitment. Date bounds and skips extended the storage format compatibly; older files remain readable. See [PR #71][pr71], [PR #78][pr78] and [PR #79][pr79].
+- **Enhancements to existing features:**
+  - **Calendar corrections:** Fixed edits after skipped occurrences. Weekday and
+    date-range changes discard obsolete cancellations, retain applicable skips
+    and continue to reject real overlaps. Regression coverage checks changed
+    weekdays, shortened bounds, rollback and saved reloads.
+  - **Regression coverage:** Added [service tests][service-tests] and
+    [model tests][model-tests] for validation, adjacency, conflict ordering,
+    date bounds, skips, one-time events, counter exhaustion, immutability and
+    range expansion. [Dispatcher tests][dispatcher-tests] check batch
+    prepare/save/publish order, failed-save retries, plan/ID preservation,
+    unrelated data, later-segment rollback and insufficient ID capacity.
+  - **Integration testing:** Added fixed-date tests showing that task and
+    commitment durations survive saving and partial allocation ([PR #30][pr30]).
+    Packaged scenarios cover edits and unavailable ranges across restarts,
+    independent deletion, invalid input, midnight boundaries and leap day.
 
-### One-time commitments and unavailable periods
+- **Documentation:**
+  - **User Guide:** Maintained the [commitment chapter][ug-commitments], including
+    adding, editing, skipping, deleting and one-time events, plus
+    [unavailable study periods][ug-unavailable] and
+    [blocking multiple dates][ug-ranges].
+  - **Developer Guide:** Wrote [commitment/dispatch design][dg-design],
+    the [implementation walkthrough][dg-implementation],
+    [transaction verification][dg-verification] and
+    [manual tests][dg-manual], including the command index. Added the
+    [class diagram][class-diagram] and [edit sequence][sequence-diagram]
+    with PlantUML sources and rendered SVGs. Explained the one-time-event
+    representation in the [design considerations][dg-design-considerations].
 
-- **What it does:** `commitment add n/NAME on/YYYY-MM-DD ...` blocks time on a single date, for example a project meeting or an afternoon when the student is unavailable.
-- **Justification:** Many fixed events happen only once; entering them as weekly series would block every week.
-- **Highlights:** A one-time commitment is a commitment whose start and end dates are equal, so planning, schedule display and overlap checks reuse the existing date-bounded logic without a new command type or storage version. I compared this with a separate kind flag in the [Developer Guide design considerations][dg-design-considerations]. See [PR #80][pr80].
-- **Multi-date unavailable periods:** For issue [#48][issue48], I implemented `addContinuousBlock` and `addDailyBlocks`, which expand a continuous or daily range into one-time commitments, validate the whole batch and reject it if any date conflicts. See [PR #86][pr86]. I subsequently connected both transports through `CommandDispatcher`: the confirmation is prepared before one complete save, live state is published only after that save, and failures preserve the previous plan and retry IDs. The six packaged range scenarios cover restart, independent deletion, invalid input, later-date conflicts, midnight boundaries and leap day.
+- **Community:**
+  - Reviewed and approved text rendering ([PR #22][pr22]), task operations
+    ([PR #25][pr25]) and console/dispatch integration ([PR #29][pr29]).
 
-### Testing
+<!-- @@author -->
 
-During PE preparation, I fixed commitment edits after skipped occurrences.
-Weekday and date-range changes now discard only cancellations that no longer
-belong to the resulting series, while retaining applicable skips and checking
-real overlaps. Regression tests cover weekday changes, shortened bounds,
-conflict rollback and saved reloads; the User and Developer Guides explain the
-calendar-specific cancellation rule. Ownership follows my existing whole-file tags.
-
-I wrote most of [`CommitmentServiceTest`][service-tests] and [`CommitmentTest`][model-tests], which cover validation boundaries, overlap and adjacency, date bounds, skips, one-time rules, conflict ordering, counter exhaustion, candidate immutability and range expansion. `CommandDispatcherTest` additionally verifies whole-batch prepare/save/publish ordering, save-failure retry, plan and ID preservation, unrelated snapshot data, later-segment rollback and insufficient ID capacity. I also added fixed-date integration tests showing that recorded task and commitment durations survive saving and partial allocation ([PR #30][pr30]), and packaged console scenarios for commitment edits and unavailable ranges across restarts.
-
-### Documentation
-
-- **User Guide:** Maintain the [commitment chapter][ug-commitments], including adding, one-time commitments, editing, skipping and deleting, plus [marking a study period unavailable][ug-unavailable] and [blocking multiple dates][ug-planned].
-- **Developer Guide:** Wrote the [commitment and dispatch design][dg-design], the [commitment implementation walkthrough][dg-implementation], [transaction verification][dg-verification] and [commitment manual tests][dg-manual], plus the manual-testing command index. Added the [commitment/dispatch class diagram][class-diagram] and [commitment edit sequence diagram][sequence-diagram], with PlantUML sources and rendered SVGs.
-
-### Team-based contributions
-
-- **Reviews:** Reviewed and approved teammates' PRs, including text rendering ([PR #22][pr22]), task operations ([PR #25][pr25]) and console/dispatch integration ([PR #29][pr29]).
-- **Authorship allocation:** Applied the team's agreed whole-file RepoSense tags to my assigned commitment and dispatcher files in [PR #93][pr93]. These tags record maintenance boundaries; Git history keeps who originally contributed each change.
-
-[reposense]: https://nus-cs2113-ay2627-s1.github.io/tp-dashboard/?search=Darren50&breakdown=true
-[github]: https://github.com/Darren50
-[service]: ../../src/main/java/scheduleflow/commitment/CommitmentService.java
-[service-tests]: ../../src/test/java/scheduleflow/commitment/CommitmentServiceTest.java
-[model-tests]: ../../src/test/java/scheduleflow/model/CommitmentTest.java
-[pr22]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/22
 [pr23]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/23
-[pr25]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/25
 [pr26]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/26
-[pr29]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/29
-[pr30]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/30
 [pr34]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/34
 [pr70]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/70
 [pr71]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/71
@@ -68,15 +99,22 @@ I wrote most of [`CommitmentServiceTest`][service-tests] and [`CommitmentTest`][
 [pr79]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/79
 [pr80]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/80
 [pr86]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/86
-[pr93]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/93
-[issue48]: https://github.com/AY2627S1-CS2113-T10-1/tp/issues/48
+[pr126]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/126
+[reposense]: https://nus-cs2113-ay2627-s1.github.io/tp-dashboard/?search=Darren50&breakdown=true
+[service-tests]: ../../src/test/java/scheduleflow/commitment/CommitmentServiceTest.java
+[model-tests]: ../../src/test/java/scheduleflow/model/CommitmentTest.java
+[dispatcher-tests]: ../../src/test/java/scheduleflow/cli/CommandDispatcherTest.java
+[pr30]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/30
 [ug-commitments]: ../UserGuide.md#commitments
 [ug-unavailable]: ../UserGuide.md#marking-a-study-period-unavailable
-[ug-planned]: ../UserGuide.md#blocking-multiple-dates-planned
+[ug-ranges]: ../UserGuide.md#blocking-multiple-dates
 [dg-design]: ../DeveloperGuide.md#commitments-and-command-execution
 [dg-implementation]: ../DeveloperGuide.md#dated-commitments-and-save-before-publication-dispatch
-[dg-design-considerations]: ../DeveloperGuide.md#commitment-design-considerations
 [dg-verification]: ../DeveloperGuide.md#commitmentdispatch-transaction-verification
 [dg-manual]: ../DeveloperGuide.md#commitments-and-unavailable-periods
 [class-diagram]: ../images/diagrams/darren-commitment-dispatch-classes.svg
 [sequence-diagram]: ../images/diagrams/darren-commitment-edit.svg
+[dg-design-considerations]: ../DeveloperGuide.md#commitment-design-considerations
+[pr22]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/22
+[pr25]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/25
+[pr29]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/29

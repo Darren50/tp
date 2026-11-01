@@ -1,58 +1,106 @@
-# Gabriel Yu - Project Portfolio Page
+# Gabriel Yu's Project Portfolio Page
+
+### Project: ScheduleFlow
+
+<!-- @@author GabrielYuSP -->
 
 ## Overview
 
-ScheduleFlow is a Java 25 command-line application that helps university students plan coursework around deadlines and fixed commitments. It generates study schedules, reports work that cannot fit, and saves plans and settings for later sessions.
+ScheduleFlow is a Java 25 command-line application that helps university students
+manage coursework, fixed commitments and study time. It generates study plans in
+30-minute slots, explains work that cannot fit before its deadline, and saves
+records and frozen plans for later sessions.
 
 ## Summary of Contributions
 
-**Code contributed:** [RepoSense code view](https://nus-cs2113-ay2627-s1.github.io/tp-dashboard/?search=GabrielYuSP&breakdown=true) | [GitHub profile](https://github.com/GabrielYuSP).
+Given below are my contributions to the project.
 
-I implemented the deadline-aware planner and daily schedule projection, then extended planning to support configurable study hours and continuous-work breaks. I also added regression coverage and documentation for planning around unavailable periods.
+- **New Feature: Added deadline-aware task planning**
+  ([planner implementation][planner-commit]).
+  - **What it does:** Assigns unfinished tasks to eligible half-hour slots in
+    deadline order, respecting study windows, fixed commitments and deadlines.
+    Reports work that cannot fit.
+  - **Justification:** Students need to see realistic capacity before deadlines
+    rather than a schedule that silently places work too late.
+  - **Highlights:** Preserves saved estimates and distinguishes exact work from
+    reserved capacity. Handles overdue, out-of-horizon and partially allocated
+    tasks. Deterministic tests check allocation order, cutoff rounding, deadline
+    boundaries, commitment blocking and conservation of remaining work.
 
-### Deadline-aware task planning
+- **New Feature: Added configurable study hours daily schedules and breaks**
+  ([study hours][hours-commit], [daily projection][schedule-commit],
+  [PR #81][pr81]).
+  - **What it does:** Supports default study hours, weekday settings and date
+    overrides. Projects saved plans into busy, task, break, unplanned and free
+    entries, reserving breaks after continuous work under a configured policy.
+  - **Justification:** A useful plan reflects when a student is available and
+    makes required rest time visible.
+  - **Highlights:** Date overrides take precedence over weekday settings and
+    defaults. Schedule projection uses the frozen plan rather than regenerating
+    it. Fixed-time tests cover hours precedence, labels, break placement and
+    continuous-work limits.
 
-- **What it does:** [`EarliestDeadlinePlanner`](../../src/main/java/scheduleflow/planning/EarliestDeadlinePlanner.java) assigns unfinished tasks to eligible half-hour slots in deadline order. It respects study windows, fixed commitments and task deadlines, and reports any work that cannot fit.
-- **Justification:** Students need to see realistic capacity before deadlines rather than a schedule that silently places work too late.
-- **Highlights:** Planning preserves each task's saved estimate, distinguishes exact work from reserved slot capacity, and handles overdue, out-of-horizon and partially allocated tasks. I added deterministic coverage for allocation order, cutoff rounding, deadline boundaries, commitment blocking and work conservation in [`EarliestDeadlinePlannerTest`](../../src/test/java/scheduleflow/planning/EarliestDeadlinePlannerTest.java). See the [planner implementation](https://github.com/AY2627S1-CS2113-T10-1/tp/commit/1644a96).
+- **Code contributed:** [RepoSense code dashboard][reposense]. My area covers
+  deadline-aware planning, daily schedule projection, study hours and work/break
+  policies through `EarliestDeadlinePlanner`, `ScheduleService`, `StudyHours`,
+  `StudyWindow` and `StudyPolicy`, plus their tests.
 
-### Study hours, schedule projection and breaks
+- **Enhancements to existing features:**
+  - **Frozen-plan validation:** Added [`Planner.validate(Plan)`][planner]
+    to reject impossible allocations without changing estimates or recreating
+    the schedule ([PR #127][pr127]). The generator validates every result before
+    returning it. Validation uses frozen time/source, long work totals, original
+    recurrence releases, effective hours and half-open intervals. It accepts
+    feasible alternative placements and legacy breaks without requiring the
+    greedy planner's exact result.
+  - **Unavailable study periods:** Added fixed-time planner and projection tests
+    for blocking time with one-time commitments ([PR #82][pr82],
+    [issue #48][issue48]). Covered replanning, reduced deadline capacity and
+    deleting/restoring a block; documented the [acceptance cases][ui-plan].
+  - **Regression coverage:** [EarliestDeadlinePlannerTest][planner-tests] checks
+    real generated allocations and their validation.
+    [PlannerTest][validation-tests] covers partial work, overlap, accounting and
+    time boundaries. Fixed-time tests keep these cases independent of the clock.
 
-- **What it does:** [`StudyHours`](../../src/main/java/scheduleflow/model/StudyHours.java) and [`StudyWindow`](../../src/main/java/scheduleflow/model/StudyWindow.java) support default hours, weekday settings and date overrides. [`ScheduleService`](../../src/main/java/scheduleflow/planning/ScheduleService.java) projects a saved plan into daily busy, task, break, unplanned and free entries. [`StudyPolicy`](../../src/main/java/scheduleflow/planning/StudyPolicy.java) configures when the planner reserves breaks after continuous work.
-- **Justification:** A useful plan must reflect when a student is actually available and make required rest time visible.
-- **Highlights:** Date-specific hours take precedence over weekday settings, which take precedence over the default. The saved plan remains a frozen result until replanning or a successful change. Fixed-time tests cover hours precedence, schedule labels, break placement and continuous-work limits. See the [hours and date-override implementation](https://github.com/AY2627S1-CS2113-T10-1/tp/commit/9216291), [daily projection](https://github.com/AY2627S1-CS2113-T10-1/tp/commit/dd5910c) and [continuous-work policy](https://github.com/AY2627S1-CS2113-T10-1/tp/pull/81).
+- **Documentation:**
+  - **User Guide:** Explained saved plans, partial allocations, exact work versus
+    reserved capacity, recurrence release timing and insufficient study time.
+    See [study plans][ug-plans], [unallocated work][ug-unallocated],
+    [weekly tasks][ug-recurring] and [troubleshooting][ug-troubleshooting].
+  - **Developer Guide:** Documented [planning/projection boundaries][dg-design],
+    the deadline-constrained example, [fixed-time verification][dg-tests], manual
+    testing and [planning terminology][dg-glossary] ([PR #102][pr102]). Added
+    the [planning class diagram][class-diagram] and
+    [planning sequence][sequence-diagram]; updated both views for validation.
+    Documented the [multi-date unavailable contract][dg-unavailable].
 
-### Unavailable study periods
+- **Team-based tasks:**
+  - Integrated deadline allocation with study hours and continuous-work policy,
+    and verified interactions with fixed commitments ([PR #81][pr81],
+    [PR #82][pr82]).
 
-For issue [#48](https://github.com/AY2627S1-CS2113-T10-1/tp/issues/48), I added fixed-time planner and projection tests for blocking study time with an ordinary one-time commitment. The tests and UI acceptance notes cover replanning around the block, loss of deadline capacity and the effects of deleting or restoring the commitment. See [PR #82](https://github.com/AY2627S1-CS2113-T10-1/tp/pull/82) and the [unavailable-period test plan](../../test/ui-test-plan.md).
-
-<!-- @@author GabrielYuSP -->
-I also documented the proposed multi-date unavailable contract. Darren's later
-dispatcher integration now makes both modes available; see the
-[implemented transaction](../DeveloperGuide.md#multi-date-unavailable-periods).
-My planning contribution remains distinct from his command execution work.
 <!-- @@author -->
 
-### Documentation
-
-- **User Guide:** Added explanations of saved plans, partial allocations, exact task work versus reserved slot capacity, recurrence release timing, and how to investigate insufficient study time. See [study plans](../UserGuide.md#study-plans), [unallocated work](../UserGuide.md#unallocated-work), [weekly recurring tasks](../UserGuide.md#weekly-recurring-tasks) and the related [troubleshooting guidance](../UserGuide.md#what-if-my-work-does-not-fit-before-its-deadline).
-- **Developer Guide:** Documented planning and schedule-projection boundaries, the deadline-constrained allocation example, fixed-time and manual verification, and planning terminology. Added class and sequence diagrams for the planning workflow. See [planning design and allocation example](../DeveloperGuide.md#planning-schedule-projection-and-recurrence), [planning tests](../DeveloperGuide.md#fixed-time-planning-and-recurrence-verification) and the [glossary](../DeveloperGuide.md#appendix-d-glossary). These guide updates are in [PR #102](https://github.com/AY2627S1-CS2113-T10-1/tp/pull/102).
-
-### Team-based contributions
-
-- **Planning features:** Integrated deadline allocation with study-hour settings and continuous-work policy, and added deterministic regression coverage for interactions with fixed commitments. See [PR #81](https://github.com/AY2627S1-CS2113-T10-1/tp/pull/81) and [PR #82](https://github.com/AY2627S1-CS2113-T10-1/tp/pull/82).
-- **Authorship allocation:** Applied the team's agreed whole-file RepoSense tags to my assigned planning, study-hours and related test files, and documented the allocation. This records the agreed ownership boundaries; it does not rewrite historical authorship. See [PR #95](https://github.com/AY2627S1-CS2113-T10-1/tp/pull/95).
-
-### Frozen-plan feasibility validation
-
-- **Change and benefit:** Added [`Planner.validate(Plan)`](../../src/main/java/scheduleflow/planning/Planner.java)
-  so impossible allocations are rejected without changing a student's estimates
-  or recreating their schedule. The generator validates each result before returning it.
-- **Implementation:** Uses frozen time/source, long work totals, original recurrence
-  release, effective hours and half-open interval checks. Accepts feasible alternative
-  placements and legacy breaks without requiring the greedy result.
-- **Coverage:** [`PlannerTest`](../../src/test/java/scheduleflow/planning/PlannerTest.java)
-  tests partial work, overlap, accounting and time boundaries. Existing allocator
-  tests exercise validation on real generated results. Updated planning guide
-  sections, glossary and class/sequence views. Persistence integration belongs to
-  Ernest and remains a separate dependency; no PR has been created for this change.
+[planner-commit]: https://github.com/AY2627S1-CS2113-T10-1/tp/commit/1644a96
+[hours-commit]: https://github.com/AY2627S1-CS2113-T10-1/tp/commit/9216291
+[schedule-commit]: https://github.com/AY2627S1-CS2113-T10-1/tp/commit/dd5910c
+[pr81]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/81
+[reposense]: https://nus-cs2113-ay2627-s1.github.io/tp-dashboard/?search=GabrielYuSP&breakdown=true
+[planner]: ../../src/main/java/scheduleflow/planning/Planner.java
+[pr127]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/127
+[pr82]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/82
+[issue48]: https://github.com/AY2627S1-CS2113-T10-1/tp/issues/48
+[ui-plan]: ../../test/ui-test-plan.md
+[planner-tests]: ../../src/test/java/scheduleflow/planning/EarliestDeadlinePlannerTest.java
+[validation-tests]: ../../src/test/java/scheduleflow/planning/PlannerTest.java
+[ug-plans]: ../UserGuide.md#study-plans
+[ug-unallocated]: ../UserGuide.md#unallocated-work
+[ug-recurring]: ../UserGuide.md#weekly-recurring-tasks
+[ug-troubleshooting]: ../UserGuide.md#what-if-my-work-does-not-fit-before-its-deadline
+[dg-design]: ../DeveloperGuide.md#planning-schedule-projection-and-recurrence
+[dg-tests]: ../DeveloperGuide.md#fixed-time-planning-and-recurrence-verification
+[dg-glossary]: ../DeveloperGuide.md#appendix-d-glossary
+[pr102]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/102
+[class-diagram]: ../images/diagrams/gabriel-planning-classes.svg
+[sequence-diagram]: ../images/diagrams/gabriel-planning-sequence.svg
+[dg-unavailable]: ../DeveloperGuide.md#multi-date-unavailable-periods
