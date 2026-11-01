@@ -104,9 +104,9 @@ Given below are my contributions to the project.
 [pr88]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/88
 [pr124]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/124
 [dg-verification]: ../DeveloperGuide.md#storage-diagnostics-and-compatibility-verification
-[storage-tests]: ../../src/test/java/scheduleflow/storage/FileStorageTest.java
-[state-tests]: ../../src/test/java/scheduleflow/storage/StateCodecTest.java
-[plan-tests]: ../../src/test/java/scheduleflow/storage/PlanCodecTest.java
+[storage-tests]: https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/storage/FileStorageTest.java
+[state-tests]: https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/storage/StateCodecTest.java
+[plan-tests]: https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/storage/PlanCodecTest.java
 [ug-start]: ../UserGuide.md#quick-start
 [ug-duration]: ../UserGuide.md#recording-duration-tasks-and-commitments
 [ug-list]: ../UserGuide.md#listing-tasks
