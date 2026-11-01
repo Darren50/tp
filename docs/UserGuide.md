@@ -9,7 +9,7 @@ ScheduleFlow is a local command line application for university students balanci
 
 Study hours default to **08:00–22:00 every day**, including weekends. You can set recurring weekday hours and override individual dates. Work is scheduled in **30-minute slots**, and any work that does not fit is reported explicitly.
 
-> **Guide scope:** This guide describes the current source build. Use a matching JAR built from this checkout; earlier published JARs may have fewer commands. Successful changes save automatically, and IDs and generated plans survive restarts.
+> **Guide version:** This guide describes **ScheduleFlow v2.1**. Use the v2.1 JAR with this guide; earlier versions may not support all commands shown here. Successful changes save automatically, and IDs and generated plans survive restarts.
 
 <!-- @@author ka-how -->
 Use [blocking multiple dates](#blocking-multiple-dates) to reserve a continuous
@@ -74,14 +74,10 @@ interval or the same daily window across several dates. Use
    java -version
    ```
 
-2. Obtain `scheduleflow.jar` from the
+2. Download `scheduleflow.jar` from the **v2.1 release** on the
    [ScheduleFlow releases page](https://github.com/AY2627S1-CS2113-T10-1/tp/releases)
-   and place it in a dedicated folder. Use a release matching this guide:
-   the published v2.0 JAR does not include the multi-date `unavailable` commands.
-   For all commands described here, use a JAR built from the current source
-   until a matching release is published.
-   A developer can build this checkout using the
-   [Developer Guide](DeveloperGuide.md#build-packaging-and-console-verification).
+   and place it in a dedicated folder. This guide describes **ScheduleFlow v2.1**;
+   earlier versions may not support all commands shown here.
 
 3. Open a terminal **in that folder** and launch:
 
@@ -1140,7 +1136,7 @@ result without reallocating work or advancing recurrence. A successful change
 to tasks, templates, commitments, hours or policy invalidates the saved plan.
 Recognized no-ops preserve it. Run `plan` again after a change.
 
-**Compatibility.** The candidate reads snapshot formats 1–5 and 7, frozen-plan
+**Compatibility.** ScheduleFlow v2.1 reads snapshot formats 1–5 and 7, frozen-plan
 formats 6 and 8, and the earlier version 5 plan layout. Loading is read-only and
 does not migrate the file. A later successful save chooses the format needed
 for the current records: snapshot versions 2–5 or 7, or plan version 6/8. These
