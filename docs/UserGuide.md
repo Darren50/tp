@@ -11,12 +11,6 @@ Study hours default to **08:00–22:00 every day**, including weekends. You can 
 
 > **Guide version:** This guide describes **ScheduleFlow v2.1**. Use the v2.1 JAR with this guide; earlier versions may not support all commands shown here. Successful changes save automatically, and IDs and generated plans survive restarts.
 
-<!-- @@author ka-how -->
-Use [blocking multiple dates](#blocking-multiple-dates) to reserve a continuous
-interval or the same daily window across several dates. Use
-[one-time commitments](#adding-a-one-time-commitment) for one date.
-<!-- @@author -->
-
 ## Contents
 
 - [Quick start](#quick-start)

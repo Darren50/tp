@@ -1,158 +1,146 @@
-# Koh Ka How - Project Portfolio Page
+# Koh Ka How's Project Portfolio Page
+
+### Project: ScheduleFlow
 
 <!-- @@author ka-how -->
-The final release review adds both implemented unavailable modes to command
-help and the User Guide reference, removes stale coming-soon text, and adds
-UI-035 plus production-entry-point and packaged tests for impossible saved
-work. The latter checks status 1, no prompt, quiet stderr and preserved bytes;
-valid frozen restart cases remain active. Storage feasibility rules and codec
-integration retain Gabriel's and Ernest's component ownership. The tracked
-guide PDFs are exported from the corrected Markdown with portable cross-guide
-links and visually reviewed storage diagrams. Verification commands and platform
-limits are in the [Developer Guide](../DeveloperGuide.md#build-packaging-and-console-verification).
-<!-- @@author -->
 
 ## Overview
 
 ScheduleFlow is a Java 25 command-line application that helps university students
-manage coursework tasks, fixed commitments and study time. It generates study
-plans in 30-minute slots, reports work that cannot fit, and saves tasks,
-commitments and generated plans for later sessions.
+manage coursework, fixed commitments and study time. It generates study plans in
+30-minute slots, explains work that cannot fit before its deadline, and saves
+records and frozen plans for later sessions.
 
 ## Summary of Contributions
 
-PE preparation adds packaged scenario UI-036 for edits after commitment skips.
-It checks unchanged frozen schedules after rejected edits, retained versus
-discarded cancellations, plan invalidation, overlap errors and two saved restarts.
-The commitment implementation and service regressions belong to Darren under
-the team's whole-file authorship allocation.
+Given below are my contributions to the project.
 
-**Code contributed:** [Personal RepoSense code view][reposense] | [GitHub profile][github].
-I implemented the application entry point, console loop, session state,
-command and response records, console I/O and output rendering in `Main`,
-`App`, `AppState`, `Command`, `CommandResponse`, `ConsoleUi` and `TextRenderer`.
+- **New Feature: Added recoverable console sessions and live-state coordination**
+  ([PR #29][pr29]).
+  - **What it does:** Connects startup, input, command execution and responses.
+    Students can correct syntax, validation and save errors at the next prompt;
+    `exit` and end of input terminate normally. Corrupt saved data stops startup
+    before commands are accepted.
+  - **Justification:** Students can correct mistakes without restarting, while
+    rejected changes leave their previous records and plan available.
+  - **Highlights:** Separated console I/O, rendering and session coordination;
+    used typed command/response values and injected storage, clocks and streams.
+    `AppState` publishes saved snapshots, invalidates outdated plans and rejects
+    stale plans. The challenge was coordinating recovery and termination across
+    the team's parser, services and storage without hiding programming defects.
 
-### Recoverable console interaction
+- **New Feature: Added consistent task and schedule presentation**
+  ([PR #22][pr22], [PR #87][pr87]).
+  - **What it does:** Formats help, confirmations, task/commitment lists, progress,
+    completion/reopening, daily schedules, `[BREAK]` rows and whole-plan
+    unallocated-work explanations.
+  - **Justification:** Stable IDs, clear labels and explicit remaining work help
+    students understand their workload and choose their next action.
+  - **Highlights:** Kept rendering free of I/O, clock reads and state changes.
+    Preserved Unicode names and schedule boundaries, fixed locale-dependent
+    dates, displayed midnight endpoints as `24:00`, and used `long` totals.
+    Distinguished exact work from reserved capacity: 45 minutes of work can
+    occupy a 60-minute interval without inflating the work total.
 
-- **What it does:** Connects startup, command input and responses into a working
-  console session. Students can correct syntax, validation and save errors at
-  the next prompt; `exit` and end of input terminate normally.
-- **Justification:** Students can recover from mistakes without restarting or
-  re-entering their saved work. Invalid saved data stops startup with an error
-  before accepting commands.
-- **Highlights:** `Main` supplies explicit UTF-8 streams, storage and a clock.
-  `App` coordinates the loop through the team's parser and dispatcher;
-  `Command` records and `CommandResponse` carry requests and results.
-  `AppState` publishes saved snapshots, clears outdated plans after changes,
-  and rejects plans derived from different data. Injected dependencies let
-  tests exercise failure paths without the developer's saved files.
-- **Output-failure hardening:** [Console I/O][console-source] now checks failed
-  writes and flushes. The [application loop][app-source] returns status 1 before
-  another command read and never tries to print another error to failed output.
-  Startup-error and goodbye writes follow the same rule; `Main` also handles
-  failure while reporting invalid process arguments. Already-saved changes
-  remain durable, so students can restart and inspect them before retrying.
+- **Code contributed:** [RepoSense code dashboard][reposense]. My area
+  comprises `Main`, `App`, `AppState`, `Command`, `CommandResponse`, `ConsoleUi`
+  and `TextRenderer`, plus their tests.
 
-### Consistent task, commitment and schedule output
+- **Project management:**
+  - Established the shared Java 25 foundation and public contracts so team
+    members could work independently ([PR #1][pr1]).
+  - Published **two releases**, [v1.0][release1] and [v2.0][release2], uploading
+    `scheduleflow.jar` with release notes, launch instructions and limitations.
+  - Created user stories for [viewing completed tasks][issue65] and
+    [weekly recurring tasks][issue67], and tracked the team's
+    [UG][issue97], [DG][issue96] and [PPP][issue98] deliverables.
 
-- **What it does:** Formats help, confirmations, lists, errors, plan summaries
-  and daily schedules. Displays task progress, completion/reopening and
-  `[BREAK]` rows, with whole-plan unallocated-work explanations.
-- **Justification:** Stable IDs, clear schedule labels and explicit remaining
-  work help students understand their workload and choose their next action.
-- **Highlights:** Rendering performs no console I/O, clock reads or state
-  changes. It preserves Unicode names and schedule boundaries, fixes
-  date/weekday formatting across default locales, displays commitment midnight
-  endpoints as `24:00`, and uses `long` totals for large workloads.
+- **Enhancements to existing features:**
+  - **Console reliability:** Detected suppressed writer/flush failures and stopped
+    with status 1 before another command read, without retrying failed output.
+    Preserved already-saved changes. Added 12 focused regression tests, including
+    controlled writer failures and isolated child JVMs ([PR #123][pr123]).
+  - **Reopening completed tasks:** Connected parsing and dispatch to the existing
+    reopening service so students can correct mistaken completion. Preserved task
+    metadata and saved changes before invalidating the plan ([PR #91][pr91]).
+  - **Regression coverage:** Added JUnit 5 tests for startup/restart, failed-save
+    recovery, stale-plan rejection and exact output. Covered Unicode, empty
+    results, midnight, leap days, non-English locales and large totals using
+    fixed clocks, temporary storage and restored JVM settings
+    ([application tests][app-tests], [renderer tests][renderer-tests],
+    [entry-point tests][main-tests]).
+  - **Packaged acceptance:** Built the isolated console runner with per-command
+    assertions and transcripts ([PR #1][pr1]); maintained the [UI plan][ui-plan].
+    Added UI-035 for impossible saved work and UI-036 for edits after commitment
+    skips, checking rejection, preserved data/plans and saved restarts.
 
-### Testing
+- **Documentation:**
+  - **User Guide:** Wrote the introduction, [command conventions][ug-format],
+    [commitment-list examples][ug-commitments], [schedule labels][ug-labels],
+    [worked schedule example][ug-example], [help/exit][ug-help] and
+    [command summary][ug-summary]. Improved navigation and checked examples
+    against console behaviour ([PR #106][pr106], [PR #134][pr134]).
+  - **Developer Guide:** Wrote [console design][dg-design],
+    [interaction/rendering][dg-implementation], setup, verification, scope and
+    manual console testing; reorganized the guide around AB3 ([PR #100][pr100]).
+    Added the [console class diagram][class-diagram] and
+    [command-loop sequence diagram][sequence-diagram], then added the
+    architecture overview and corrected notation across all eleven guide
+    diagrams ([PR #120][pr120]).
+  - Exported both guides as PDFs and checked their content, links and rendered
+    layouts for portable offline documentation ([PR #119][pr119]).
 
-Extended the [three-platform CI workflow][ci-workflow] to run the full Java 25
-build and packaging, Node runner self-tests, active console scenarios and the
-assertions-enabled JAR/distribution checks sequentially. Each OS retains its
-JUnit/Checkstyle reports and console/release transcripts even after failure;
-saved data and diagnostic logs are excluded. This makes packaging and console
-regressions visible alongside unit-test failures. Hosted execution is pending;
-a local check does not establish that all three hosted platforms passed.
+- **Team-based tasks:**
+  - Reviewed frozen-plan invariants and regression coverage for overlap, timing,
+    task references and accounting ([PR #127 review][review127]). Commented on
+    recurrence coverage across components and saved restarts
+    ([PR #76 review][review76]).
+  - Added contributor guidance requiring Javadoc and meaningful JUnit regression
+    tests, and repaired team profile/portfolio navigation ([PR #22][pr22],
+    [PR #101][pr101]).
 
-Wrote JUnit 5 tests for the application entry point, console loop, live state,
-command contracts, console I/O and rendering. [Application tests][app-tests]
-cover startup, restart and recovery from invalid input or failed saves;
-[state tests][state-tests] check plan invalidation and stale-plan rejection.
-[Rendering tests][renderer-tests] assert exact output for empty results,
-Unicode names, non-English default locales, midnight, leap days and large
-duration totals. Tests use fixed clocks, temporary storage and restored JVM
-locale settings to remain deterministic and independent.
+- **Tools:** Extended the existing Ubuntu/macOS/Windows CI matrix to run the
+  Java 25 build, runner self-tests, console scenarios and packaged release
+  checks, retaining reports after failures ([PR #123][pr123]). Fixed Shadow JAR
+  distribution classpaths and enabled launcher assertions ([PR #35][pr35]).
+  CI configuration is not evidence that every hosted platform passed.
 
-Added controlled write/flush failures in [console tests][console-tests],
-single-attempt output-failure and real-save/reload cases in the application
-tests, and isolated child-JVM stdout failures in [entry-point tests][main-tests].
-The tests check no command read after failed output, status 1, quiet default
-stderr and propagation of unrelated unchecked storage I/O defects. The updated
-[class view][current-class-diagram] and [sequence view][current-sequence-diagram]
-show the writer check and termination boundary; these controlled
-tests do not claim actual broken-pipe or cross-platform evidence.
-
-### Documentation
-
-- **User Guide:** Wrote the introduction, [command conventions][ug-format],
-  [commitment-list explanation and examples][ug-commitments],
-  [schedule labels][ug-labels], [worked schedule example][ug-example],
-  [help and exit instructions][ug-help], and [command reference][ug-summary].
-  Maintained the page metadata, contents, section headings and navigation.
-- **Developer Guide:** Wrote [console design][dg-design] and
-  [recoverable interaction/rendering][dg-implementation], including a
-  [console class diagram][class-diagram] and
-  [command-loop sequence diagram][sequence-diagram]. Also documented
-  [setup][dg-setup], [build/console verification][dg-verification],
-  [product scope][dg-scope] and [manual console tests][dg-manual], and
-  reorganized the guide around the AB3 structure. These changes are in
-  [PR #100][pr100].
-
-### Team-based tasks
-
-- **Issue tracking:** Created user stories for [viewing completed tasks][issue65]
-  and [weekly recurring tasks][issue67]. Created documentation tasks for
-  [Developer Guide updates][issue96], [User Guide updates][issue97] and
-  [team portfolios][issue98] to track the team's deliverables.
-- **Release:** Published [ScheduleFlow v1.0][release] and uploaded its executable
-  `scheduleflow.jar`, with release notes, Java 25 launch instructions and
-  usage limitations.
-- **Documentation upkeep:** Corrected the [About Us table and links][issue18].
-  Added contributor guidance requiring Javadoc for declaration documentation
-  and meaningful JUnit regression tests for changes to Java behaviour.
+<!-- @@author -->
 
 [reposense]: https://NUS-CS2113-AY2627-S1.github.io/tp-dashboard/?search=ka-how&breakdown=true
-[github]: https://github.com/ka-how
+[pr1]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/1
+[pr22]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/22
+[pr29]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/29
+[pr35]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/35
+[pr87]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/87
+[pr91]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/91
 [pr100]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/100
-[app-tests]: ../../src/test/java/scheduleflow/cli/AppTest.java
-[state-tests]: ../../src/test/java/scheduleflow/cli/AppStateTest.java
-[renderer-tests]: ../../src/test/java/scheduleflow/cli/TextRendererTest.java
-[ci-workflow]: ../../.github/workflows/gradle.yml
-[app-source]: ../../src/main/java/scheduleflow/cli/App.java
-[console-source]: ../../src/main/java/scheduleflow/cli/ConsoleUi.java
-[console-tests]: ../../src/test/java/scheduleflow/cli/ConsoleUiTest.java
-[main-tests]: ../../src/test/java/scheduleflow/MainTest.java
-[current-class-diagram]: ../images/diagrams/ka-how-console-classes.svg
-[current-sequence-diagram]: ../images/diagrams/ka-how-command-loop.svg
-[issue18]: https://github.com/AY2627S1-CS2113-T10-1/tp/issues/18
+[pr101]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/101
+[pr106]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/106
+[pr119]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/119
+[pr120]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/120
+[pr123]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/123
+[pr134]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/134
+[review127]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/127#pullrequestreview-5725879665
+[review76]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/76#pullrequestreview-5623696993
+[release1]: https://github.com/AY2627S1-CS2113-T10-1/tp/releases/tag/v1.0
+[release2]: https://github.com/AY2627S1-CS2113-T10-1/tp/releases/tag/v2.0
 [issue65]: https://github.com/AY2627S1-CS2113-T10-1/tp/issues/65
 [issue67]: https://github.com/AY2627S1-CS2113-T10-1/tp/issues/67
 [issue96]: https://github.com/AY2627S1-CS2113-T10-1/tp/issues/96
 [issue97]: https://github.com/AY2627S1-CS2113-T10-1/tp/issues/97
 [issue98]: https://github.com/AY2627S1-CS2113-T10-1/tp/issues/98
-[release]: https://github.com/AY2627S1-CS2113-T10-1/tp/releases/tag/v1.0
+[app-tests]: ../../src/test/java/scheduleflow/cli/AppTest.java
+[renderer-tests]: ../../src/test/java/scheduleflow/cli/TextRendererTest.java
+[main-tests]: ../../src/test/java/scheduleflow/MainTest.java
+[ui-plan]: ../../test/ui-test-plan.md
 [ug-format]: ../UserGuide.md#command-format
 [ug-commitments]: ../UserGuide.md#listing-commitments
 [ug-labels]: ../UserGuide.md#schedule-labels
 [ug-example]: ../UserGuide.md#worked-schedule-example
 [ug-help]: ../UserGuide.md#help-and-exit
 [ug-summary]: ../UserGuide.md#command-summary
-[dg-design]: https://github.com/ka-how/tp/blob/b6c0c83c742fbdae635ab69e493e2c69200aac80/docs/DeveloperGuide.md#console-application-and-presentation
-[dg-implementation]: https://github.com/ka-how/tp/blob/b6c0c83c742fbdae635ab69e493e2c69200aac80/docs/DeveloperGuide.md#recoverable-console-interaction-and-deterministic-rendering
-[class-diagram]: https://github.com/ka-how/tp/blob/b6c0c83c742fbdae635ab69e493e2c69200aac80/docs/images/ka-how-console-classes.svg
-[sequence-diagram]: https://github.com/ka-how/tp/blob/b6c0c83c742fbdae635ab69e493e2c69200aac80/docs/images/ka-how-command-loop.svg
-[dg-setup]: https://github.com/ka-how/tp/blob/b6c0c83c742fbdae635ab69e493e2c69200aac80/docs/DeveloperGuide.md#setting-up-getting-started
-[dg-verification]: https://github.com/ka-how/tp/blob/b6c0c83c742fbdae635ab69e493e2c69200aac80/docs/DeveloperGuide.md#build-packaging-and-console-verification
-[dg-scope]: https://github.com/ka-how/tp/blob/b6c0c83c742fbdae635ab69e493e2c69200aac80/docs/DeveloperGuide.md#appendix-a-product-scope
-[dg-manual]: https://github.com/ka-how/tp/blob/b6c0c83c742fbdae635ab69e493e2c69200aac80/docs/DeveloperGuide.md#launch-help-exit-and-console-behavior
+[dg-design]: ../DeveloperGuide.md#console-application-and-presentation
+[dg-implementation]: ../DeveloperGuide.md#recoverable-console-interaction-and-deterministic-rendering
+[class-diagram]: ../images/diagrams/ka-how-console-classes.svg
+[sequence-diagram]: ../images/diagrams/ka-how-command-loop.svg
