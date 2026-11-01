@@ -165,9 +165,11 @@ range transports exist but their console routes remain unfinished.
 
 ### Task model and command parsing
 
-**Candidate scope:** the Task sections describe source revision `f7d21f4`,
-checked for the upcoming release, not the published v1.0 JAR. Reconcile these
-claims with the actual release artifact before publication. The implementation
+<!-- @@author nickpatt -->
+**Candidate scope:** the Task sections describe the current source and its
+task/parser regression tests, not the published v1.0 JAR. Build this checkout
+when verifying the candidate; the [release review](release/nickpatt-release-review.md)
+records validation and remaining integration gates. The implementation
 explanation concerns the Task lifecycle enhancement; the later whole-file
 allocation also assigns the complete parser to Nickhil, but does not establish
 who originally wrote every parser or integration method.
@@ -183,8 +185,8 @@ The two groups have different responsibilities. The stateless
 the entire input and constructs Ka How's nested `Command` records. It does not
 look up IDs, read a clock, save data or invoke a service. `ParseException`
 preserves a message and the recognized command's usage hint. This applies to
-all command families, not just tasks; a syntactically recognized unavailable
-range command is not evidence that its deferred dispatch is implemented.
+all command families, not just tasks. Both unavailable range transports have
+separate dispatcher/service acceptance; parser tests establish syntax only.
 
 [`TaskService`](../src/main/java/scheduleflow/task/TaskService.java) reads
 Ernest's immutable `Snapshot` and returns a validated candidate or the identical
@@ -202,6 +204,7 @@ Gabriel owns template generation and the provenance type; Nickhil's service
 preserves that provenance when changing an already-generated task. Snapshot
 validation and storage remain external. The diagram intentionally omits
 repetitive accessors, parser patterns and constructor overloads.
+<!-- @@author -->
 
 ### Commitments and command execution
 
@@ -555,6 +558,7 @@ diagnostic severity text and keeps logger configuration inside that process.
 
 ### Exact task work and retained task lifecycle
 
+<!-- @@author nickpatt -->
 The enhancement lets a student record actual work without losing task identity
 or confusing remaining work with scheduled capacity. Suppose T1 has 90 minutes
 remaining. A reported 61-minute session at 25% credits **15**, leaving **75**.
@@ -640,6 +644,10 @@ remain in `task list`; the dispatcher implements the completed-only view using
 the service's numeric-ID list. A generated task has the same lifecycle, but its
 original release and template provenance survive every replacement. These
 mutations neither generate occurrences nor modify Gabriel's templates.
+Deleting a template also retains its generated tasks. Progress, completion,
+reopening and edits continue to work on those records without the live template;
+their original occurrence release remains unchanged even when the visible
+deadline changes. No deleted template is recreated by a task mutation.
 
 Only a changed, present deadline is checked against
 `now < deadline <= TimeRules.horizonEnd(now)`. Renaming an overdue task or retaining
@@ -662,6 +670,7 @@ the single completion authority. Rejecting excess credit exposes an inaccurate
 report instead of silently losing its meaning. The design intentionally stores
 neither an original-work baseline nor a timer/history, so it cannot report a
 whole-task completion percentage or reconstruct earlier estimates.
+<!-- @@author -->
 
 ### Dated commitments and save-before-publication dispatch
 
@@ -1373,6 +1382,7 @@ establish those results.
 
 ### Task/parser validation and JUnit/documentation conventions
 
+<!-- @@author nickpatt -->
 Run the owned tests with Java 25 from the repository root:
 
 ```shell
@@ -1382,10 +1392,12 @@ Run the owned tests with Java 25 from the repository root:
 [`TaskServiceTest`](../src/test/java/scheduleflow/task/TaskServiceTest.java)
 checks 0/50/100% credit, floor rounding, large products, no-op identity,
 completion/reopening, and captured-time deadline boundaries. TaskRecurrenceTest
-checks generated-task metadata preservation; it does not replace Gabriel's
-generation tests. TaskEditTest and InputRulesTest cover transport/null rules and
+checks generated-task metadata preservation, including the complete lifecycle
+after template deletion with custom hours/policy and surrounding tasks; it does
+not replace Gabriel's generation tests. TaskEditTest and InputRulesTest cover transport/null rules and
 normalization. CommandParserTest covers all families' grammar and usage hints,
-not whether deferred commands execute. Tests use explicit times, temporary data,
+not command execution. Explicit rejection tests keep domain-only optional-deadline,
+deadline-clearing and priority APIs outside the console grammar. Tests use explicit times, temporary data,
 and restored logger/locale settings; see [test conventions](../src/test/AGENTS.md).
 Link documentation claims to those tests rather than adding tests for prose.
 
@@ -1396,6 +1408,7 @@ these classes install no handlers. Public validation works without `-ea`;
 assertions check internal invariants. Lifecycle methods do not all emit stage
 logs. [JUnit/documentation standards](../AGENTS.md) remain the authority for
 Javadoc, isolation and verification; builds alone are not manual acceptance.
+<!-- @@author -->
 
 ### Commitment/dispatch transaction verification
 
@@ -1527,6 +1540,7 @@ the supported command surface.
 
 ## Appendix B: User Stories
 
+<!-- @@author nickpatt -->
 These are product stories, not a redistribution of implementation credit.
 **Candidate** means supported by the inspected source, newer than published
 v1.0; **Planned** means not a working console feature. Feature owners should
@@ -1551,7 +1565,12 @@ review their rows against the final release tag before publication.
 | Candidate | student balancing deadlines | generate a plan and view daily schedules | see when to work and which work does not fit. |
 | Candidate | returning student | restore records, settings and the exact saved plan | continue without re-entry or a changed schedule. |
 | Candidate | student encountering invalid input or a rejected save | receive an error without partial changes | correct and safely retry the request. |
-| Planned | student unavailable across multiple dates | submit a continuous or daily unavailable range | avoid entering each date separately once dispatch is implemented. |
+| Candidate | student unavailable across multiple dates | submit a continuous or daily unavailable range | block each affected date atomically without entering it separately. |
+
+The range story is supported by `CommandDispatcherTest`, `CommitmentServiceTest`
+and active UI-022 through UI-027. Candidate status describes implemented source;
+it does not certify completion of storage validation, PDF export or hosted CI.
+<!-- @@author -->
 
 ## Appendix C: Non-Functional Requirements
 
@@ -1693,6 +1712,7 @@ terminal/provider behavior on another OS.
 
 ### Tasks and input validation
 
+<!-- @@author nickpatt -->
 Use Java 25 and a JAR built from the candidate source described in
 [Task design](#task-model-and-command-parsing), not v1.0. Launch
 `java -ea -jar scheduleflow.jar` from an empty disposable folder. Choose `D`
@@ -1747,6 +1767,18 @@ of an already-completed task similarly preserves an existing plan. See
 [storage testing](#saving-restoration-failure-and-recovery) for failed-save/restart
 recipes and [Task syntax](UserGuide.md#tasks) for more fields. Exit before
 discarding only this disposable folder. Live timing is not a fixed-clock test.
+
+**Retained generated task after template deletion**
+
+In a fresh disposable store, add
+`task recur add n/Quiz due/D 1800 d/30 every/WEEKLY until/D`, then enter
+`task recur delete R1`. `task recur list` must be empty while `task list` still
+contains T1. Record `task progress T1 done/7`, complete T1, reopen it with
+`task reopen T1 remaining/45`, then rename it using `task edit T1 n/Independent quiz`.
+The same T1 must remain with 45 minutes; the template list stays empty. Restart
+and check both lists again. The fixed-time `TaskRecurrenceTest` additionally
+checks original release/provenance, priority, position, settings and counters.
+<!-- @@author -->
 
 ### Commitments and unavailable periods
 

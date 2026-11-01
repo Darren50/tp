@@ -148,8 +148,9 @@ Examples below are independent unless a sequence is explicitly described. Use ex
 
 ## Tasks
 
+<!-- @@author nickpatt -->
 > **Candidate-release note:** these Task sections describe the upcoming-release
-> source checked at `f7d21f4`, not every feature in the published v1.0 JAR.
+> source and its task/parser tests, not every feature in the published v1.0 JAR.
 > Use the matching candidate build when trying progress, completion and reopening.
 
 A task records exact whole minutes of remaining work. A positive estimate is
@@ -165,6 +166,7 @@ plan; run `plan` again. Recognized no-ops and rejected commands preserve it.
 Loaded undated tasks display `No deadline`, but console addition requires
 `due/`; there are no console commands for clearing deadlines or changing priority.
 For repeated coursework, see [weekly task templates](#weekly-recurring-tasks).
+<!-- @@author -->
 
 ### Recording duration (tasks and commitments)
 
@@ -202,6 +204,7 @@ attempts to revise a completed task and failed saves preserve the prior data
 and plan. For example, if a save fails while changing 45 to 90 minutes, the
 stored estimate remains 45 until a retry succeeds.
 
+<!-- @@author nickpatt -->
 ### Recording progress
 
 ```text
@@ -240,7 +243,9 @@ Each successful repeated submission records additional work; there is no
 automatic duplicate detection. A failed save applies nothing, so retrying that
 failed request is safe. Unknown IDs, invalid values and rejected saves preserve
 the prior records and plan. Progress on a generated task changes only that
-occurrence, not its template or original release time.
+occurrence, not its template or original release time. It remains available
+after the template is deleted.
+<!-- @@author -->
 
 ### Adding a task
 
@@ -420,6 +425,7 @@ completed record is a no-op, preserving the plan without another save. Unknown
 IDs and failed saves preserve the previous record and plan. Completion survives
 restart; use [reopen](#reopening-a-completed-task), not a new task, to correct it.
 
+<!-- @@author nickpatt -->
 ### Reopening a completed task
 
 ```text
@@ -439,7 +445,8 @@ Reopened T1: CS2113 draft | Remaining: 45 min
 
 Completion may have come from `task complete` or progress credit reaching zero.
 Reopening preserves the ID, name, deadline, priority and any recurrence
-provenance; it does not edit a template or generate another occurrence. Loaded
+provenance; it does not edit a template or generate another occurrence. You can
+also reopen a retained generated task after deleting its template. Loaded
 completed tasks with overdue or absent deadlines may also reopen unchanged in
 those respects. An overdue task remains overdue until you change its deadline.
 
@@ -449,6 +456,7 @@ in `task list completed`, and its remaining estimate survives restarting.
 Unknown IDs, active tasks, invalid estimates and failed saves preserve the
 existing records and plan. To change an active task's estimate instead, use
 `task remaining TNUMBER remaining/MINUTES`.
+<!-- @@author -->
 
 ### Deleting a task
 

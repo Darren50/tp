@@ -6,16 +6,21 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import scheduleflow.common.ValidationException;
 import scheduleflow.model.RecurringTask;
 import scheduleflow.model.Snapshot;
+import scheduleflow.model.StudyHours;
+import scheduleflow.model.StudyWindow;
 import scheduleflow.model.Task;
 import scheduleflow.model.TaskOccurrence;
 import scheduleflow.model.TaskPriority;
+import scheduleflow.planning.StudyPolicy;
 
 /** Verifies task mutations preserve recurrence data and reject inconsistent snapshot fixtures. */
 class TaskRecurrenceTest {
@@ -81,6 +86,48 @@ class TaskRecurrenceTest {
         assertThrows(ValidationException.class, () -> service.reopen(reopened, 1, 19));
         assertThrows(NullPointerException.class, () -> service.setPriority(source, 1, null));
         assertThrows(ValidationException.class, () -> service.setPriority(source, 0, TaskPriority.HIGH));
+    }
+
+    @Test
+    void lifecycle_deletedTemplate_retainsIndependentTaskAndAllSettings() {
+        TaskService service = new TaskService();
+        RecurringTaskService recurrence = new RecurringTaskService();
+        LocalDateTime due = NOW.plusDays(1);
+        Snapshot configured = Snapshot.empty().withStudyHours(new StudyHours(Map.of(
+                "monday", new StudyWindow(LocalTime.of(9, 0), LocalTime.of(18, 0)),
+                "2026-10-02", new StudyWindow(LocalTime.of(10, 0), LocalTime.of(17, 0)))))
+                .withStudyPolicy(Optional.of(new StudyPolicy(60, 30)));
+        Snapshot ordinary = service.add(configured, "First", due, 45, NOW);
+        Snapshot generated = recurrence.add(ordinary, "Quiz", due, 30, Optional.of(due.toLocalDate()), NOW);
+        Snapshot populated = service.add(service.setPriority(generated, 2, TaskPriority.HIGH),
+                "Last", due, 1, NOW);
+        Snapshot source = recurrence.delete(populated, 1);
+        Task retained = source.tasks().get(1);
+
+        Snapshot worked = service.recordWork(source, 2, 7);
+        Snapshot credited = service.recordSessionProgress(worked, 2, 3, 50);
+        Snapshot completed = service.complete(credited, 2);
+        Snapshot reopened = service.reopen(completed, 2, 45);
+        Snapshot edited = service.edit(reopened, 2,
+                new TaskEdit(Optional.of("Independent quiz"), Optional.of(due.plusDays(1)), false), NOW);
+        List<Snapshot> candidates = List.of(worked, credited, completed, reopened, edited);
+        List<Integer> remaining = List.of(23, 22, 0, 45, 45);
+        for (int index = 0; index < candidates.size(); index++) {
+            boolean isEdited = index == candidates.size() - 1;
+            Task expected = new Task(2, isEdited ? "Independent quiz" : retained.name(),
+                    isEdited ? Optional.of(due.plusDays(1)) : retained.deadline(), remaining.get(index),
+                    retained.priority(), retained.occurrence());
+            assertEquals(source.withTasks(List.of(source.tasks().getFirst(), expected,
+                    source.tasks().getLast()), source.nextTaskId()), candidates.get(index));
+        }
+        assertEquals(List.of(), source.recurringTasks());
+        assertEquals(30, source.tasks().get(1).remainingMinutes());
+        assertEquals(due.minusWeeks(1), retained.occurrence().orElseThrow().release());
+        assertSame(edited, recurrence.materialize(edited, NOW.plusWeeks(2)));
+        assertSame(source, service.recordWork(source, 2, 0));
+        assertSame(completed, service.complete(completed, 2));
+        assertThrows(ValidationException.class, () -> service.recordWork(completed, 2, 0));
+        assertThrows(ValidationException.class, () -> service.reopen(edited, 2, 1));
     }
 
     @Test

@@ -397,6 +397,15 @@ class CommandParserTest {
         }
     }
     @Test
+    void parse_domainOnlyTaskApis_rejectsUnreleasedConsoleForms() {
+        assertRejected("task add n/Draft d/45", TASK_ADD_USAGE);
+        assertRejected("task add n/Draft due/NONE d/45", TASK_ADD_USAGE);
+        assertRejected("task edit T1 due/NONE", "task edit TNUMBER [n/NAME] [due/YYYY-MM-DD HHmm]");
+        assertRejected("task edit T1 priority/HIGH", "task edit TNUMBER [n/NAME] [due/YYYY-MM-DD HHmm]");
+        assertRejected("task priority T1 priority/HIGH", HELP_USAGE);
+    }
+
+    @Test
     void parse_nullLine_rejectsWithArgumentName() {
         assertEquals("line", assertThrows(NullPointerException.class, () -> parser.parse(null)).getMessage());
     }
