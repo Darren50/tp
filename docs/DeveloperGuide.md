@@ -924,6 +924,8 @@ step 4 fails, the previous snapshot, plan and file all remain current.
 plan" takes precedence over date-range errors. Domain exceptions remain their
 owners' validation; the dispatcher neither catches nor rewords them.
 
+<a id="commitment-design-considerations"></a>
+
 #### Design considerations
 
 **Aspect: when to publish a change**
@@ -1558,9 +1560,10 @@ Schedules stay frozen until regenerated or invalidated by a successful change.
 
 The application is a single-user, local/offline application with one
 running instance per data file. It has no calendar synchronization, GUI,
-notifications or automatic progress timer. Multi-date unavailable commands
-remain proposed console integration; see the [User Guide](UserGuide.md) for
-the supported command surface.
+notifications or automatic progress timer. Multi-date unavailable requests are
+supported through the continuous and daily commands; see
+[blocking multiple dates](UserGuide.md#blocking-multiple-dates) for their syntax
+and atomic behavior.
 
 ## Appendix B: User Stories
 

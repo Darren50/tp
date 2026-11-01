@@ -9,7 +9,7 @@ ScheduleFlow is a local command line application for university students balanci
 
 Study hours default to **08:00–22:00 every day**, including weekends. You can set recurring weekday hours and override individual dates. Work is scheduled in **30-minute slots**, and any work that does not fit is reported explicitly.
 
-> **Guide scope:** This guide describes the current development build for the upcoming v2.0 release. Earlier published JARs may have fewer commands. Successful changes save automatically, and IDs and generated plans survive restarts.
+> **Guide scope:** This guide describes the current source build. Use a matching JAR built from this checkout; earlier published JARs may have fewer commands. Successful changes save automatically, and IDs and generated plans survive restarts.
 
 <!-- @@author ka-how -->
 Use [blocking multiple dates](#blocking-multiple-dates) to reserve a continuous
@@ -72,10 +72,10 @@ interval or the same daily window across several dates. Use
    java -version
    ```
 
-2. Place `scheduleflow.jar` in a dedicated folder. This guide targets the
-   upcoming v2.0 development build; use its matching candidate JAR for these
-   commands. The older published v1.0 JAR has fewer features. A developer can
-   build the candidate using the [Developer Guide](DeveloperGuide.md#build-packaging-and-console-verification).
+2. Place `scheduleflow.jar` in a dedicated folder. Use a JAR matching the current
+   source for these commands. Earlier release JARs may have fewer features.
+   A developer can build this checkout using the
+   [Developer Guide](DeveloperGuide.md#build-packaging-and-console-verification).
 
 3. Open a terminal **in that folder** and launch:
 
@@ -153,7 +153,7 @@ Examples below are independent unless a sequence is explicitly described. Use ex
 ## Tasks
 
 <!-- @@author nickpatt -->
-> **Candidate-release note:** these Task sections describe the upcoming-release
+> **Source-build note:** these Task sections describe the current
 > source and its task/parser tests, not every feature in the published v1.0 JAR.
 > Use the matching candidate build when trying progress, completion and reopening.
 

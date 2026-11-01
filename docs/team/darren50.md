@@ -75,7 +75,7 @@ I wrote most of [`CommitmentServiceTest`][service-tests] and [`CommitmentTest`][
 [ug-planned]: ../UserGuide.md#blocking-multiple-dates-planned
 [dg-design]: ../DeveloperGuide.md#commitments-and-command-execution
 [dg-implementation]: ../DeveloperGuide.md#dated-commitments-and-save-before-publication-dispatch
-[dg-design-considerations]: ../DeveloperGuide.md#design-considerations-1
+[dg-design-considerations]: ../DeveloperGuide.md#commitment-design-considerations
 [dg-verification]: ../DeveloperGuide.md#commitmentdispatch-transaction-verification
 [dg-manual]: ../DeveloperGuide.md#commitments-and-unavailable-periods
 [class-diagram]: ../images/diagrams/darren-commitment-dispatch-classes.svg
