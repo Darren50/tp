@@ -2,9 +2,9 @@
 
 | Display | Name | GitHub Profile | Portfolio |
 | --- | --- | --- | --- |
-| ![](https://via.placeholder.com/100.png?text=Photo) | Koh Ka How | [GitHub](https://github.com/ka-how) | [Portfolio](team/ka-how.md) |
-| ![](https://via.placeholder.com/100.png?text=Photo) | Darren | [GitHub](https://github.com/darren50) | [Portfolio](team/darren50.md) |
-| ![](https://via.placeholder.com/100.png?text=Photo) | Nickhil Pattikonda | [GitHub](https://github.com/nickpatt) | [Portfolio](team/nickpatt.md) |
-| ![](https://via.placeholder.com/100.png?text=Photo) | Ernest Goh | [GitHub](https://github.com/ernestgoh-god) | [Portfolio](team/ernestgoh-god.md) |
-| ![](https://via.placeholder.com/100.png?text=Photo) | Gabriel Yu | [GitHub](https://github.com/GabrielYuSP) | [Portfolio](team/gabrielyusp.md) |
+| <img src="images/profile-placeholder.png" alt="Profile placeholder" width="100"> | Koh Ka How | [GitHub](https://github.com/ka-how) | [Portfolio](team/ka-how.md) |
+| <img src="images/profile-placeholder.png" alt="Profile placeholder" width="100"> | Darren | [GitHub](https://github.com/darren50) | [Portfolio](team/darren50.md) |
+| <img src="images/profile-placeholder.png" alt="Profile placeholder" width="100"> | Nickhil Pattikonda | [GitHub](https://github.com/nickpatt) | [Portfolio](team/nickpatt.md) |
+| <img src="images/profile-placeholder.png" alt="Profile placeholder" width="100"> | Ernest Goh | [GitHub](https://github.com/ernestgoh-god) | [Portfolio](team/ernestgoh-god.md) |
+| <img src="images/profile-placeholder.png" alt="Profile placeholder" width="100"> | Gabriel Yu | [GitHub](https://github.com/GabrielYuSP) | [Portfolio](team/gabrielyusp.md) |
 
