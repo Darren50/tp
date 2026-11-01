@@ -862,8 +862,9 @@ command: `commitment add n/Unavailable on/YYYY-MM-DD start/HHmm d/MINUTES`.
 The name is an ordinary user description, not a reserved keyword. Equal
 inclusive date bounds represent the single unavailable occurrence, and
 `Commitment.occursOn(date)` supplies the same date membership check to the
-allocator and schedule projection. There is no separate availability model,
-new command or storage format for this workflow.
+allocator and schedule projection. This single-date workflow reuses the existing
+commitment command and storage format. For continuous or daily ranges, see
+[multi-date unavailable periods](#multi-date-unavailable-periods).
 
 A period may overlap previously allocated task sessions: commitment overlap
 validation checks fixed commitments, not temporary task allocations. The
@@ -1331,6 +1332,22 @@ and failures only, set both `scheduleflow.level` and the handler level to
 `WARNING`. Constructors perform no I/O or logging configuration.
 
 #### Diagram and guide maintenance
+
+Keep the User Guide's introduction, quick start, Features, troubleshooting,
+limitations and command summary aligned with the current executable. The
+[course UG requirements](https://nus-cs2113-ay2627-s1.github.io/website/admin/tp-deliverables.html#deliverable-user-guide-ug)
+require precise coverage of current features in `docs/UserGuide.md`, following
+the [AB3 UG structure](https://se-education.org/addressbook-level3/UserGuide.html).
+Review grammar against `CommandParser`, confirmations against `TextRenderer`,
+and behavior against the dispatcher, services and maintained JUnit/UI cases.
+Use fixed-clock tests for illustrative schedule timestamps; ordinary packaged
+launches use the real local clock. Keep existing section anchors stable when
+reorganizing headings, and refresh the companion PDF after text changes.
+
+Before submission, publish the updated guide on the product's GitHub Pages
+website and check its links against the actual release JAR. A locally verified
+source build does not establish that the published guide or an older release
+asset matches. In particular, v2.0 predates the multi-date unavailable commands.
 
 Editable PlantUML sources and the shared `course-style.puml` are in
 `docs/diagrams`. Each figure has a numbered caption and links to its source and

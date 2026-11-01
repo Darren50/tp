@@ -20,40 +20,41 @@ interval or the same daily window across several dates. Use
 ## Contents
 
 - [Quick start](#quick-start)
-- [Command format](#command-format)
-- [Tasks](#tasks)
-  - [Recording duration (tasks and commitments)](#recording-duration-tasks-and-commitments)
-  - [Recording progress](#recording-progress)
-  - [Adding a task](#adding-a-task)
-  - [Listing tasks](#listing-tasks)
-  - [Editing a task](#editing-a-task)
-  - [Weekly recurring tasks](#weekly-recurring-tasks)
-  - [Completing and viewing completed tasks](#completing-and-viewing-completed-tasks)
-  - [Reopening a completed task](#reopening-a-completed-task)
-  - [Deleting a task](#deleting-a-task)
-- [Commitments](#commitments)
-  - [Adding a commitment](#adding-a-commitment)
-  - [Adding a one-time commitment](#adding-a-one-time-commitment)
-  - [Editing a commitment](#editing-a-commitment)
-  - [Skipping one occurrence](#skipping-one-occurrence)
-  - [Listing commitments](#listing-commitments)
-  - [Deleting a commitment](#deleting-a-commitment)
-- [Study hours](#study-hours)
-- [Study plans](#study-plans)
-  - [Generating a plan](#generating-a-plan)
-  - [Marking a study period unavailable](#marking-a-study-period-unavailable)
-  - [Blocking multiple dates](#blocking-multiple-dates)
-  - [Session limits and breaks](#session-limits-and-breaks)
-  - [Planning hours and date range](#planning-hours-and-date-range)
-  - [Unallocated work](#unallocated-work)
-- [Viewing the schedule](#viewing-the-schedule)
-  - [Schedule labels](#schedule-labels)
-  - [Worked schedule example](#worked-schedule-example)
-  - [Planning partway through the day](#planning-partway-through-the-day)
-- [Help and exit](#help-and-exit)
-  - [Viewing help](#viewing-help)
-  - [Exiting the program](#exiting-the-program)
-- [Saving and restoring data](#saving-and-restoring-data)
+- [Features](#features)
+  - [Command format](#command-format)
+  - [Tasks](#tasks)
+    - [Recording duration (tasks and commitments)](#recording-duration-tasks-and-commitments)
+    - [Recording progress](#recording-progress)
+    - [Adding a task](#adding-a-task)
+    - [Listing tasks](#listing-tasks)
+    - [Editing a task](#editing-a-task)
+    - [Weekly recurring tasks](#weekly-recurring-tasks)
+    - [Completing and viewing completed tasks](#completing-and-viewing-completed-tasks)
+    - [Reopening a completed task](#reopening-a-completed-task)
+    - [Deleting a task](#deleting-a-task)
+  - [Commitments](#commitments)
+    - [Adding a commitment](#adding-a-commitment)
+    - [Adding a one-time commitment](#adding-a-one-time-commitment)
+    - [Editing a commitment](#editing-a-commitment)
+    - [Skipping one occurrence](#skipping-one-occurrence)
+    - [Listing commitments](#listing-commitments)
+    - [Deleting a commitment](#deleting-a-commitment)
+  - [Study hours](#study-hours)
+  - [Study plans](#study-plans)
+    - [Generating a plan](#generating-a-plan)
+    - [Marking a study period unavailable](#marking-a-study-period-unavailable)
+    - [Blocking multiple dates](#blocking-multiple-dates)
+    - [Session limits and breaks](#session-limits-and-breaks)
+    - [Planning hours and date range](#planning-hours-and-date-range)
+    - [Unallocated work](#unallocated-work)
+  - [Viewing the schedule](#viewing-the-schedule)
+    - [Schedule labels](#schedule-labels)
+    - [Worked schedule example](#worked-schedule-example)
+    - [Planning partway through the day](#planning-partway-through-the-day)
+  - [Help and exit](#help-and-exit)
+    - [Viewing help](#viewing-help)
+    - [Exiting the program](#exiting-the-program)
+  - [Saving and restoring data](#saving-and-restoring-data)
 - [Troubleshooting and FAQ](#troubleshooting-and-faq)
   - [What if my work does not fit before its deadline?](#what-if-my-work-does-not-fit-before-its-deadline)
   - [How do I mark work as complete or correct an entry?](#how-do-i-mark-work-as-complete-or-correct-an-entry)
@@ -62,6 +63,7 @@ interval or the same daily window across several dates. Use
   - [Can I schedule more than a year ahead?](#can-i-schedule-more-than-a-year-ahead)
   - [Why was my command rejected?](#why-was-my-command-rejected)
   - [What should I do if the application cannot load my data?](#what-should-i-do-if-the-application-cannot-load-my-data)
+- [Known limitations](#known-limitations)
 - [Command summary](#command-summary)
 
 ## Quick start
@@ -72,8 +74,12 @@ interval or the same daily window across several dates. Use
    java -version
    ```
 
-2. Place `scheduleflow.jar` in a dedicated folder. Use a JAR matching the current
-   source for these commands. Earlier release JARs may have fewer features.
+2. Obtain `scheduleflow.jar` from the
+   [ScheduleFlow releases page](https://github.com/AY2627S1-CS2113-T10-1/tp/releases)
+   and place it in a dedicated folder. Use a release matching this guide:
+   the published v2.0 JAR does not include the multi-date `unavailable` commands.
+   For all commands described here, use a JAR built from the current source
+   until a matching release is published.
    A developer can build this checkout using the
    [Developer Guide](DeveloperGuide.md#build-packaging-and-console-verification).
 
@@ -91,7 +97,7 @@ interval or the same daily window across several dates. Use
 4. Type `help` and press Enter. Do not type the prompt itself. Then try:
 
    ```text
-   task add n/CS2113 draft due/2026-11-02 1800 d/45
+   task add n/CS2113 draft due/2026-11-20 1800 d/45
    commitment add n/CS2113 lecture day/MON start/1000 d/120
    plan
    schedule today
@@ -108,9 +114,11 @@ interval or the same daily window across several dates. Use
    for the date you originally viewed. Viewing a saved schedule does not move
    its sessions forward.
 
-## Command format
+## Features
 
-Enter each command on one line and press Enter. Terminal transcripts include the `scheduleflow>` prompt; copy only the command after it.
+### Command format
+
+Enter each command on one line and press Enter. Terminal transcripts include the `scheduleflow>` prompt; copy only the command after it. When copying from a PDF, join wrapped command lines with ordinary spaces before submitting them.
 
 In command formats:
 
@@ -150,13 +158,9 @@ Impossible dates such as `2026-02-30` are rejected rather than adjusted. A new t
 
 Examples below are independent unless a sequence is explicitly described. Use existing IDs and suitable future task deadlines in your own session. Output times contain a colon (`10:30`), while task/commitment command times use four digits (`1030`).
 
-## Tasks
+### Tasks
 
 <!-- @@author nickpatt -->
-> **Source-build note:** these Task sections describe the current
-> source and its task/parser tests, not every feature in the published v1.0 JAR.
-> Use the matching candidate build when trying progress, completion and reopening.
-
 A task records exact whole minutes of remaining work. A positive estimate is
 unfinished; zero means **completed but retained**, not deleted. Neither planning
 nor elapsed time subtracts work automatically. Use `task progress` to record
@@ -172,7 +176,7 @@ Loaded undated tasks display `No deadline`, but console addition requires
 For repeated coursework, see [weekly task templates](#weekly-recurring-tasks).
 <!-- @@author -->
 
-### Recording duration (tasks and commitments)
+#### Recording duration (tasks and commitments)
 
 Use `d/MINUTES` when adding a task or commitment; there is no separate duration
 command or running timer. Tasks accept positive whole minutes, such as `d/1`
@@ -209,7 +213,7 @@ and plan. For example, if a save fails while changing 45 to 90 minutes, the
 stored estimate remains 45 until a retry succeeds.
 
 <!-- @@author nickpatt -->
-### Recording progress
+#### Recording progress
 
 ```text
 task progress TNUMBER done/MINUTES
@@ -251,7 +255,7 @@ occurrence, not its template or original release time. It remains available
 after the template is deleted.
 <!-- @@author -->
 
-### Adding a task
+#### Adding a task
 
 **Command:** `task add`
 
@@ -296,7 +300,7 @@ consume an ID. Optional [Task diagnostics](DeveloperGuide.md#taskparser-validati
 record validation and candidate-processing stages in a separate log file, without
 task names, deadlines or durations. Normal launches keep the same console output.
 
-### Listing tasks
+#### Listing tasks
 
 ```text
 task list
@@ -315,7 +319,7 @@ T2 | Reading | 0 min | 2026-11-02 18:00
 Total: 2 task(s).
 ```
 
-An empty store displays `No tasks found.` Use
+An empty task list displays `No tasks found.` Use
 [`task list completed`](#completing-and-viewing-completed-tasks) for only the
 retained completed records. Template R IDs appear in
 [`task recur list`](#weekly-recurring-tasks); generated occurrences appear here
@@ -324,7 +328,7 @@ with ordinary T IDs.
 Duration is the saved remaining-work estimate, not the unallocated remainder
 of the latest plan. Listing neither credits work nor changes the saved plan.
 
-### Editing a task
+#### Editing a task
 
 ```text
 task edit TNUMBER [n/NAME] [due/YYYY-MM-DD HHmm]
@@ -354,7 +358,7 @@ Unknown IDs, invalid replacements and failed saves leave the whole edit unapplie
 To revise the estimate use `task remaining T1 remaining/90`, not `d/` in an edit.
 Removing a deadline with `due/NONE` is not supported by the console.
 
-### Weekly recurring tasks
+#### Weekly recurring tasks
 
 ```text
 task recur add n/NAME due/YYYY-MM-DD HHmm d/MINUTES every/WEEKLY [until/YYYY-MM-DD]
@@ -402,7 +406,7 @@ tasks. Their estimates can be revised with `task remaining`, and completed work
 can be recorded with `task progress`; both preserve their provenance. Explicit
 completion and reopening are available through `task complete` and `task reopen`.
 
-### Completing and viewing completed tasks
+#### Completing and viewing completed tasks
 
 Use `task complete TNUMBER` when no work remains, even if the stored estimate
 is still positive. It sets remaining work to zero **without deleting the task**.
@@ -430,7 +434,7 @@ IDs and failed saves preserve the previous record and plan. Completion survives
 restart; use [reopen](#reopening-a-completed-task), not a new task, to correct it.
 
 <!-- @@author nickpatt -->
-### Reopening a completed task
+#### Reopening a completed task
 
 ```text
 task reopen TNUMBER remaining/MINUTES
@@ -462,7 +466,7 @@ existing records and plan. To change an active task's estimate instead, use
 `task remaining TNUMBER remaining/MINUTES`.
 <!-- @@author -->
 
-### Deleting a task
+#### Deleting a task
 
 ```text
 task delete TNUMBER
@@ -485,7 +489,7 @@ Deleting a generated occurrence does not delete its template, and its saved
 generation history prevents that same occurrence from being recreated. To stop
 future generation, see [template deletion](#weekly-recurring-tasks).
 
-## Commitments
+### Commitments
 
 A recurring commitment reserves the same period every week. It can continue until
 deleted, or use inclusive start and end dates for a semester or other limited period.
@@ -495,7 +499,7 @@ such as a project meeting, reserves a period on a single calendar date.
 Commitment addition, editing, skipping, deletion and listing run directly at the
 console. Each successful change saves automatically and clears the current plan.
 
-### Adding a commitment
+#### Adding a commitment
 
 ```text
 commitment add n/NAME day/DAY start/HHmm d/MINUTES [from/YYYY-MM-DD until/YYYY-MM-DD]
@@ -538,7 +542,7 @@ Rejected additions leave existing commitments and IDs unchanged. Optional
 record processing stages separately without commitment names or schedules.
 Normal launches keep the same console output.
 
-### Adding a one-time commitment
+#### Adding a one-time commitment
 
 ```text
 commitment add n/NAME on/YYYY-MM-DD start/HHmm d/MINUTES
@@ -569,7 +573,7 @@ and clears the current plan. A recurring commitment entered with the same `from/
 and `until/` date has exactly one occurrence, so it is treated and displayed as a
 one-time commitment.
 
-### Editing a commitment
+#### Editing a commitment
 
 ```text
 commitment edit CNUMBER [n/NAME] [day/DAY|on/YYYY-MM-DD] [start/HHmm] [d/MINUTES] [from/YYYY-MM-DD until/YYYY-MM-DD]
@@ -620,7 +624,7 @@ saves leave the saved data, IDs, current records and plan unchanged. Correct the
 input or save problem and retry. Edited values survive restarting the application.
 Editing a commitment also preserves configured study hours and date overrides.
 
-### Skipping one occurrence
+#### Skipping one occurrence
 
 ```text
 commitment skip CNUMBER on/YYYY-MM-DD
@@ -646,7 +650,7 @@ every remaining occurrence. Skips survive restarting the application and are
 shown by `commitment list`. Delete the series if every occurrence should be
 removed instead. One-time commitments cannot be skipped; delete them instead.
 
-### Listing commitments
+#### Listing commitments
 
 ```text
 commitment list
@@ -694,7 +698,7 @@ An empty list displays:
 No commitments found.
 ```
 
-### Deleting a commitment
+#### Deleting a commitment
 
 ```text
 commitment delete CNUMBER
@@ -715,7 +719,7 @@ Deleted commitment C1: CS2113 lecture
 
 A successful deletion saves the change and clears the current plan. Run `plan` again to make the released time available for study sessions.
 
-## Study hours
+### Study hours
 
 Set a recurring window independently for each weekday:
 
@@ -765,7 +769,7 @@ and settings survive restarting the application. Existing saves without hours
 continue to use the default. A save containing custom hours requires this version
 of ScheduleFlow; older versions cannot read the new format.
 
-## Study plans
+### Study plans
 
 A study plan is a saved snapshot of your tasks, commitments, study hours and
 policy when you run `plan`. Use `schedule` to view its time slots by date. The
@@ -773,7 +777,7 @@ plan does not change a task's saved remaining-work estimate. Every newly
 generated result is checked against the tasks and availability captured for
 that plan before it is returned for saving.
 
-### Generating a plan
+#### Generating a plan
 
 ```text
 plan
@@ -792,14 +796,14 @@ If a task cannot fit completely, `plan` still saves the sessions that fit and
 reports its remaining work. See [Unallocated work](#unallocated-work) for the
 reported reasons and how exact work relates to the half-hour slots.
 
-When every task fits:
+When every unfinished task fits (also when all retained tasks are completed):
 
 ```text
 scheduleflow> plan
 Study plan generated successfully! Type 'schedule today' to view your sessions.
 ```
 
-When there are no tasks:
+When there are no stored tasks after generating any recurring occurrences:
 
 ```text
 scheduleflow> plan
@@ -810,7 +814,7 @@ Even with no tasks, `plan` creates a current plan. You can then view commitments
 
 Each `plan` command saves and replaces the previous plan without changing stored task durations. If saving fails, the previous plan remains available. This allocator follows deadline order; it does not guarantee the fewest sessions or the greatest number of fully completed tasks.
 
-### Marking a study period unavailable
+#### Marking a study period unavailable
 
 Use a one-time commitment to block time on a particular date, including time
 that a previous plan assigned to a task:
@@ -838,11 +842,12 @@ The existing one-time commitment rules apply: half-hour-aligned starts,
 positive durations divisible by 30, and an interval ending by midnight. A block
 may overlap planned task sessions, but it cannot overlap another commitment
 occurring on that date. Rejected additions preserve the existing plan and data.
-There is no separate `unavailable` command or command to select a session by ID.
+For several dates, use [`unavailable continuous` or `unavailable daily`](#blocking-multiple-dates).
+There is no command to select a planned session by ID.
 
 <a id="blocking-multiple-dates-planned"></a>
 
-### Blocking multiple dates
+#### Blocking multiple dates
 
 Use either command to block several dates in one atomic request:
 
@@ -868,7 +873,22 @@ Saved unavailable periods. Run plan to regenerate.
 Daily mode blocks only the stated same-day window on every date from `from/`
 through `until/`, both inclusive. Its start must be earlier than its end; use
 continuous mode for an overnight interval. Both modes require half-hour-aligned
-times and ordinary commitment names.
+times in `HHmm` format from `0000` through `2330`, and ordinary commitment names.
+Dates may be any real date in years 0001–9999, including past dates; only dates
+within a generated plan's range affect that plan. Daily mode can cover a single
+date when its endpoints are equal. Continuous mode requires its end date/time
+to be strictly later than its start.
+
+In a separate empty store, the daily example produces:
+
+```text
+scheduleflow> unavailable daily n/Appointment from/2026-10-26 until/2026-10-28 start/1500 end/1700
+Blocked 3 unavailable periods.
+C1 | 2026-10-26 | 15:00 - 17:00 | Appointment
+C2 | 2026-10-27 | 15:00 - 17:00 | Appointment
+C3 | 2026-10-28 | 15:00 - 17:00 | Appointment
+Saved unavailable periods. Run plan to regenerate.
+```
 
 Each generated period receives its own `C` ID, so it can later be edited or
 deleted independently. ScheduleFlow validates the complete batch first. If any
@@ -880,7 +900,7 @@ run `plan` again before viewing the changed schedule.
 The [Developer Guide transaction description](DeveloperGuide.md#multi-date-unavailable-periods)
 explains the all-or-nothing integration and verification boundaries.
 
-### Session limits and breaks
+#### Session limits and breaks
 
 Set a maximum continuous-work duration and the consecutive break required before
 further study. Both values must be positive whole multiples of 30 minutes.
@@ -902,14 +922,21 @@ set with the same values, or resetting an already-unrestricted policy, prints
 `Study policy unchanged.` and preserves the plan. Invalid input and failed saves
 preserve both settings and the current plan. `policy show` changes nothing.
 
-The continuous-work limit counts study tasks and fixed commitments together.
-At the limit, further study waits for the configured consecutive break, shown
-as `HH:mm - HH:mm | [BREAK]`. Commitments stay fixed even when they exceed the
-limit; one configured break still suffices afterward. Natural idle time can
-satisfy the break. Study-session padding counts as occupied time. With no stored
-policy, including when opening an older file, planning remains unrestricted.
+The continuous-work limit counts study tasks and fixed commitments together,
+including commitments outside study hours and before today's planning cutoff.
+Counting starts at midnight on the generation date; past task study is not
+reconstructed. At the limit, further study waits for the configured consecutive
+break. Commitments stay fixed even when they exceed the limit; one configured
+break still suffices afterward. Study-session padding counts as occupied time.
 
-### Planning hours and date range
+Natural idle time, including time outside study hours, can satisfy the break.
+Only eligible slots withheld from pending work are labelled `[BREAK]`; natural
+rest and trailing idle time remain `[FREE]` or `[UNPLANNED]`. A commitment can
+interrupt rest, so reserved break rows need not form one uninterrupted interval.
+With no stored policy, including when opening an older file, planning remains
+unrestricted.
+
+#### Planning hours and date range
 
 Study windows default to **08:00–22:00 every local calendar day**, including weekends.
 The planner uses each date's effective [study hours](#study-hours).
@@ -936,7 +963,7 @@ This is a calendar year, not a fixed 365 days. For a 29 February start date, the
 
 Dates and times use your computer's local wall time. Time zone offsets are not stored; changing the computer's time zone reinterprets saved times as local times. Durations are wall-clock minutes, including across daylight-saving changes.
 
-### Unallocated work
+#### Unallocated work
 
 If work does not fit, ScheduleFlow keeps a **partial plan** and reports the remaining minutes for each affected task. This is a valid planning result. Even a completely blocked task remains in the plan's unallocated-work report.
 
@@ -970,7 +997,7 @@ credits 45 minutes of work while the schedule reserves 60 minutes; the remaining
 15 minutes are padding, not extra task work. Planning leaves the saved estimate
 unchanged; use `task progress` or `task remaining` to update it.
 
-## Viewing the schedule
+### Viewing the schedule
 
 If no plan exists, generate one with [`plan`](#generating-a-plan). Then use either command to view a date:
 
@@ -983,7 +1010,7 @@ schedule YYYY-MM-DD
 
 The schedule displays the latest saved plan's full configured study window in chronological order, along with its generation time. Viewing a date does not regenerate the plan or record progress. Commitments are clipped to that date's study window: with default hours, a 07:30–09:00 commitment appears as 08:00–09:00. Commitments entirely outside study hours remain visible in [`commitment list`](#listing-commitments) but do not appear in the schedule.
 
-### Schedule labels
+#### Schedule labels
 
 | Label | Meaning |
 | --- | --- |
@@ -997,7 +1024,7 @@ A commitment remains `[BUSY]` even when it occurred before the planning cutoff. 
 
 Task rows show reserved time in 30-minute slots. For example, 45 minutes of remaining work can occupy a 60-minute `[TASK]` interval. The extra 15 minutes are padding; generating or viewing the plan does not reduce the saved work estimate. See [exact work and unallocated totals](#unallocated-work).
 
-### Worked schedule example
+#### Worked schedule example
 
 This reference transcript assumes an empty store, default **08:00–22:00** study hours, no work/break policy, and a local time of **Monday, 2 November 2026 at 07:00**. Run these commands in order:
 
@@ -1025,7 +1052,7 @@ The task uses the two free morning hours first, then resumes after the commitmen
 
 When trying this at another time, use a future deadline within the allowed range. The displayed date, generation time and available slots depend on when you run `plan`; the exact rows above require the stated setup.
 
-### Planning partway through the day
+#### Planning partway through the day
 
 This is an illustrative fixed-time example, not a clock-setting command. Suppose
 you generate a plan at **10:07 on 5 October 2026**, using default 08:00–22:00
@@ -1061,11 +1088,11 @@ the allowed dates. If no plan exists, the response is
 the saved plan; rejected commands and recognized no-ops preserve it. See
 [why schedules disappear](#why-did-my-schedule-disappear) for details.
 
-## Help and exit
+### Help and exit
 
 Use these commands at the `scheduleflow>` prompt. Both preserve saved data and the current plan.
 
-### Viewing help
+#### Viewing help
 
 ```text
 help
@@ -1073,7 +1100,7 @@ help
 
 Displays `=== ScheduleFlow Command Help ===`, followed by every supported command format and a short description, then returns to the prompt. Enter `help` without arguments. See the linked [command summary](#command-summary) for each command's detailed instructions.
 
-### Exiting the program
+#### Exiting the program
 
 ```text
 scheduleflow> exit extra
@@ -1093,7 +1120,7 @@ saved successfully before its confirmation failed to appear. Restart with
 working output and inspect the saved tasks, commitments or schedule before
 repeating that command.
 
-## Saving and restoring data
+### Saving and restoring data
 
 ScheduleFlow loads saved records and any frozen plan **before its first prompt**.
 It saves successful changes automatically; there is no `save` or `load` command.
@@ -1241,6 +1268,17 @@ record processing stages in a separate log file. Storage stage records omit
 task names and saved contents; broader application errors can contain paths or
 other details, so inspect any logs before sharing them. Logging does not repair
 the file. Normal launches stay quiet.
+
+## Known limitations
+
+- Study windows cannot cross midnight or end at `24:00`. Use one window per
+  date, and commitments or unavailable periods to block time within it.
+- Planning and viewing schedules do not track elapsed study or send reminders.
+  Record completed work with [`task progress`](#recording-progress).
+- There is no undo for deletion or automatic backup history. Close the app
+  before [backing up or transferring saved data](#saving-and-restoring-data).
+- Run only one instance per data file, on a filesystem supporting atomic
+  replacement. Concurrent writers and recovery after power loss are unsupported.
 
 <!-- @@author ka-how -->
 ## Command summary
