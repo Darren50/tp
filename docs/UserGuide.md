@@ -9,14 +9,6 @@ ScheduleFlow is a local command line application for university students balanci
 
 Study hours default to **08:00–22:00 every day**, including weekends. You can set recurring weekday hours and override individual dates. Work is scheduled in **30-minute slots**, and any work that does not fit is reported explicitly.
 
-> **Guide scope:** This guide describes the current source build. Use a matching JAR built from this checkout; earlier published JARs may have fewer commands. Successful changes save automatically, and IDs and generated plans survive restarts.
-
-<!-- @@author ka-how -->
-Use [blocking multiple dates](#blocking-multiple-dates) to reserve a continuous
-interval or the same daily window across several dates. Use
-[one-time commitments](#adding-a-one-time-commitment) for one date.
-<!-- @@author -->
-
 ## Contents
 
 - [Quick start](#quick-start)

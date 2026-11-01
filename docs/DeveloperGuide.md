@@ -9,11 +9,6 @@ ScheduleFlow is a Java 25 console application for university students planning
 coursework around fixed commitments. For commands and user examples, see the
 [User Guide](UserGuide.md).
 
-> **Guide scope:** This guide describes the current source build. Build and test
-> the same revision when following it. Published v2.0 predates the multi-date
-> unavailable commands; publish a matching release and updated GitHub Pages
-> guide together before submission.
-
 ## Contents
 
 - [Acknowledgements](#acknowledgements)
