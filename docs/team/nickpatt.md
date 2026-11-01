@@ -16,8 +16,7 @@ records and frozen plans for later sessions.
 Given below are my contributions to the project.
 
 - **New Feature: Added task lifecycle operations with exact work estimates**
-  ([progress/completion implementation][progress-commit],
-  [task queries and priority APIs][queries-commit]).
+  ([progress/completion implementation][progress-commit]).
   - **What it does:** Supports exact whole-minute estimates, direct progress,
     session-percentage credit, retained completion and explicit reopening.
     Students can revise estimates and resume completed work while preserving
@@ -28,6 +27,13 @@ Given below are my contributions to the project.
     save before publication. Session credit is rounded down and uses long
     arithmetic before multiplication to avoid overflow. No-op updates retain
     snapshot identity. Rejected inputs preserve records, counters and plans.
+
+- **Earlier prototype work:** The [task query and priority implementation][queries-commit]
+  records work on a stacked feature branch. Its search and scoped-query features
+  are not part of the current master command surface. The current task service
+  has a priority mutation API, but no priority command is exposed. These source
+  links distinguish historical work from features users can run; whole-file
+  parser ownership likewise does not claim original authorship of every parser.
 
 - **Code contributed:** [RepoSense code dashboard][reposense]. My area comprises
   `Task`, `TaskPriority`, `TaskEdit`, `TaskService`, `CommandParser`,
