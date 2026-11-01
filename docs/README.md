@@ -23,7 +23,7 @@ description: Turn coursework deadlines and fixed commitments into a study plan y
 
     <ul>
       <li>To start using ScheduleFlow, follow the <a href="QuickStart.html"><strong>Quick start</strong></a>. You will need Java 25.</li>
-      <li>For commands, examples, and troubleshooting, see the <a href="UserGuide.html"><strong>User Guide</strong></a>.</li>
+      <li>For commands, examples, and troubleshooting, see the <a href="UserGuide.html"><strong>User Guide</strong></a>. For exact command formats, use its <a href="UserGuide.html#command-summary">command summary</a>.</li>
       <li>To develop ScheduleFlow, start with the <a href="DeveloperGuide.html"><strong>Developer Guide</strong></a>.</li>
     </ul>
 
