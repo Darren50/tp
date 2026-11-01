@@ -13,7 +13,7 @@ exact output, invalid values, plan invalidation, replanning and saved data after
 two restarts. Save failure is covered by an isolated dispatcher fake because
 process-level fault injection is unavailable.
 
-All thirty-five maintained process scenarios are active. They exercise the packaged
+All thirty-six maintained process scenarios are active. They exercise the packaged
 JAR in fresh temporary folders, with restart sessions sharing only their own
 saved data. Review this plan and `ui-scenarios.json` after each coherent code
 update. The fixtures are the executable source of truth for exact responses.
@@ -70,7 +70,7 @@ Use `./gradlew` on Unix. If needed, set `GRADLE_USER_HOME` to a writable cache.
 The three-OS CI workflow now runs the same sequence with Java 25 and Node 22,
 after printing runtime versions. It selects the OS-appropriate wrapper and
 retains JUnit/Checkstyle reports and console/release transcripts on failure.
-The active fixture list contains 35 release scenarios. The separate range-plan
+The active fixture list contains 36 release scenarios. The separate range-plan
 file is retained as an empty valid fixture after UI-022 through UI-027 moved into
 the main suite. Adding these CI steps does not by itself certify hosted matrix
 results. Runtime saved data and diagnostic logs are not CI artifacts.
@@ -134,6 +134,7 @@ optional/completed restored-data compatibility case and exact-minute restart che
 
 | ID | Coverage | Status |
 | --- | --- | --- |
+| UI-036 | Edit skipped commitments across weekday/range changes, retain applicable cancellations, preserve plans on rejection and save across two restarts | Active |
 | UI-030 | Minute/session progress, rounded and zero credit, invalid values, completion, plan invalidation and two saved restarts | Active |
 | UI-021 | Unavailable study period: custom hours, add/delete plan invalidation, restart and released interval | Active |
 | UI-020 | Restored optional/completed tasks, exact work and saved restart | Active |

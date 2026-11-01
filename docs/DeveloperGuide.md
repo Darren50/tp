@@ -783,9 +783,12 @@ use version 2 on new saves.
 `Commitment` stores an immutable set of skipped calendar dates. `recursOn`
 checks the weekday and optional inclusive bounds without exceptions, while
 `occursOn` additionally excludes skipped dates. The constructor rejects a
-skipped date outside the series or on another weekday. Editing retains the set,
-so an edit that would move an existing exception outside the resulting series
-is rejected instead of silently losing it.
+skipped date outside the series or on another weekday. Editing first validates
+the replacement without skips, then retains only dates for which that replacement's
+`recursOn` returns true. This lets a student change weekdays or shorten a semester
+after cancelling a class. Applicable calendar cancellations remain unchanged;
+obsolete ones are removed, and a one-time result retains none. Conflict checking
+uses the complete replacement with its retained skips before returning a candidate.
 
 `CommitmentService.skip` resolves the stable ID, rejects non-occurrence and
 duplicate dates, and replaces the record at its original stored position. The
@@ -1429,7 +1432,7 @@ or temporary storage, so no test reads the real time or the developer's data:
 | Test class | Tests | What it establishes |
 | --- | --- | --- |
 | [`CommitmentTest`](../src/test/java/scheduleflow/model/CommitmentTest.java) | 13 | Record validation boundaries, `occursOn`/`recursOn`, adjacency versus overlap, shared-occurrence checks for bounded and skipped series. |
-| [`CommitmentServiceTest`](../src/test/java/scheduleflow/commitment/CommitmentServiceTest.java) | 52 | Each operation returns a candidate and leaves its source unchanged; conflict messages and ordering; edits keep position, ID and study hours; skip/one-time rules; counter exhaustion; unavailable-range expansion. |
+| [`CommitmentServiceTest`](../src/test/java/scheduleflow/commitment/CommitmentServiceTest.java) | 55 | Each operation returns a candidate and leaves its source unchanged; conflict messages and ordering; edits keep position, ID and study hours; skip/one-time rules, including weekday/range edits after skips; counter exhaustion; unavailable-range expansion. |
 | [`CommandDispatcherTest`](../src/test/java/scheduleflow/cli/CommandDispatcherTest.java) | 46 | Every route and a single clock read per command; save-before-publication for each mutation and unavailable batch; failed saves preserving state, plan, counters and retry IDs; no-op and read-only commands making no save; the one-`savePlan` planning transaction. |
 
 The dispatcher tests use an in-memory `FakeStorage` that records attempts and can
@@ -1440,6 +1443,10 @@ candidate is saved. `execute_planRejectedAfterMaterialization_preservesSourcePla
 covers a plan rejected after recurrence materialization. Packaged console
 scenarios UI-014 (partial edits, rejection, plan invalidation and restart) and
 UI-017 (occurrence skips and restart) exercise the same rules through the JAR.
+UI-036 checks edits after skips: shortened bounds retain only applicable
+cancellations, weekday changes remove obsolete cancellations, invalid edits keep
+the frozen plan, and the edited series survives two restarts. Service regressions
+also check that real conflicts still reject the edit and leave the source intact.
 UI-022 through UI-027 exercise both unavailable batch routes, rollback boundaries,
 restart persistence, independent deletion and calendar boundary cases.
 

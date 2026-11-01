@@ -594,6 +594,12 @@ check every other series. Blank names, unknown IDs and empty edits are rejected.
 When changing a late start and duration, supply both together so the complete
 replacement ends by midnight.
 
+Skipped dates are calendar-specific. An edit keeps cancellations that still
+fall on the resulting weekday and within its date range. It removes cancellations
+that no longer belong to the edited series. For example, moving a Monday lecture
+to Tuesday removes its old Monday skips; shortening a semester keeps only skips
+inside the new bounds. Renaming or changing the time preserves applicable skips.
+
 For a one-time commitment, `n/`, `start/` and `d/` work as above. Move it to another
 date with `on/`, which also sets the weekday:
 

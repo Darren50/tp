@@ -306,6 +306,7 @@ public final class CommitmentService {
     /**
      * Replaces paired date limits when supplied; omitted dates retain the original range.
      * Equal dates make the result one-time, and a one-time commitment's weekday changes only with its date.
+     * Retains skipped dates only when they remain occurrences of the edited weekly series.
      */
     public Snapshot edit(Snapshot state, int commitmentId, String name, DayOfWeek day,
             LocalTime start, Integer minutes, LocalDate startDate, LocalDate endDate) {
@@ -341,11 +342,10 @@ public final class CommitmentService {
         }
         LocalDate first = keepsDates ? original.startDate() : startDate;
         LocalDate last = keepsDates ? original.endDate() : endDate;
-        // A one-time result has no other occurrences, so earlier weekly skips no longer apply.
-        Set<LocalDate> skippedDates = first != null && first.equals(last) ? Set.of() : original.skippedDates();
         Commitment edited = new Commitment(id, name == null ? original.name() : name,
                 day == null ? original.day() : day, start == null ? original.start() : start,
-                minutes == null ? original.durationMinutes() : minutes, first, last, skippedDates);
+                minutes == null ? original.durationMinutes() : minutes, first, last);
+        edited = retainApplicableSkips(original, edited);
         LOGGER.fine("Replacement fields validated; checking other weekly series");
         rejectOverlaps(edited, state.commitments().stream().filter(commitment -> commitment.id() != id).toList());
         List<Commitment> replacements = new ArrayList<>(state.commitments());
@@ -357,6 +357,21 @@ public final class CommitmentService {
                 : "Edit must preserve record counts, tasks and both counters";
         LOGGER.fine("Commitment edit candidate created; not yet saved or published");
         return candidate;
+    }
+
+    /**
+     * Preserves calendar cancellations that still belong to the replacement series.
+     * Changing weekdays or bounds must not leave obsolete skips blocking an otherwise valid edit.
+     * A one-time result cannot retain a cancellation of its sole occurrence.
+     */
+    private Commitment retainApplicableSkips(Commitment original, Commitment edited) {
+        if (edited.isOneTime()) {
+            return edited;
+        }
+        Set<LocalDate> skippedDates = original.skippedDates().stream()
+                .filter(edited::recursOn).collect(Collectors.toSet());
+        return new Commitment(edited.id(), edited.name(), edited.day(), edited.start(), edited.durationMinutes(),
+                edited.startDate(), edited.endDate(), skippedDates);
     }
 
     /**

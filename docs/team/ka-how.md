@@ -21,6 +21,12 @@ commitments and generated plans for later sessions.
 
 ## Summary of Contributions
 
+PE preparation adds packaged scenario UI-036 for edits after commitment skips.
+It checks unchanged frozen schedules after rejected edits, retained versus
+discarded cancellations, plan invalidation, overlap errors and two saved restarts.
+The commitment implementation and service regressions belong to Darren under
+the team's whole-file authorship allocation.
+
 **Code contributed:** [Personal RepoSense code view][reposense] | [GitHub profile][github].
 I implemented the application entry point, console loop, session state,
 command and response records, console I/O and output rendering in `Main`,
