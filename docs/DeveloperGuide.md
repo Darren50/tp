@@ -90,11 +90,11 @@ the team's ownership allocation.
 
 ### System overview and collaboration boundaries
 
-![ScheduleFlow component architecture](images/architecture.svg)
+![ScheduleFlow component architecture](images/diagrams/architecture.svg)
 
 **Figure 1. Component architecture and selected source dependencies.**
 
-[PlantUML source](diagrams/architecture.puml) · [PNG](images/architecture.png)
+[PlantUML source](diagrams/architecture.puml) · [PNG](images/diagrams/architecture.png)
 
 The console application coordinates the domain services and persistence.
 Services produce immutable candidates; the dispatcher saves and then publishes
@@ -128,11 +128,11 @@ denote retained references; dashed dependencies denote creation or use.
 `...` marks omitted parameters. Service, codec, clock and transport-use
 dependencies are omitted to keep this view focused.
 
-![Console shell classes, command transports and external collaborators](images/ka-how-console-classes.svg)
+![Console shell classes, command transports and external collaborators](images/diagrams/ka-how-console-classes.svg)
 
 **Figure 2. Console shell, command values and collaborators.**
 
-[PlantUML source](diagrams/ka-how-console-classes.puml) · [PNG](images/ka-how-console-classes.png)
+[PlantUML source](diagrams/ka-how-console-classes.puml) · [PNG](images/diagrams/ka-how-console-classes.png)
 
 [`Main`](../src/main/java/scheduleflow/Main.java) supplies UTF-8 streams,
 `Clock.systemDefaultZone()` and `FileStorage` for `data/scheduleflow.txt` relative
@@ -175,11 +175,11 @@ explanation concerns the Task lifecycle enhancement; the later whole-file
 allocation also assigns the complete parser to Nickhil, but does not establish
 who originally wrote every parser or integration method.
 
-![Task lifecycle and parser classes, with external aggregate and transport types](images/nickhil-task-parser-classes.svg)
+![Task lifecycle and parser classes, with external aggregate and transport types](images/diagrams/nickhil-task-parser-classes.svg)
 
 **Figure 3. Task model, lifecycle service and parser dependencies.**
 
-[PlantUML source](diagrams/nickhil-task-parser-classes.puml) · [PNG](images/nickhil-task-parser-classes.png)
+[PlantUML source](diagrams/nickhil-task-parser-classes.puml) · [PNG](images/diagrams/nickhil-task-parser-classes.png)
 
 The two groups have different responsibilities. The stateless
 [`CommandParser`](../src/main/java/scheduleflow/cli/CommandParser.java) matches
@@ -216,11 +216,11 @@ dispatcher holds. Solid arrows are retained references; dashed arrows are use or
 creation. Colours are shared with the other views; contributor names remain in
 the ownership table, outside the UML model.
 
-![Commitment and dispatch classes with their external collaborators](images/darren-commitment-dispatch-classes.svg)
+![Commitment and dispatch classes with their external collaborators](images/diagrams/darren-commitment-dispatch-classes.svg)
 
 **Figure 4. Commitment service and dispatcher collaborators.**
 
-[PlantUML source](diagrams/darren-commitment-dispatch-classes.puml) · [PNG](images/darren-commitment-dispatch-classes.png)
+[PlantUML source](diagrams/darren-commitment-dispatch-classes.puml) · [PNG](images/diagrams/darren-commitment-dispatch-classes.png)
 
 | Type | Responsibility |
 | --- | --- |
@@ -310,11 +310,11 @@ fallback, while the snapshot's policy is the saved setting. Shared immutable
 records use associations rather than exclusive-lifetime composition. Only selected
 members and the window-aware `eligibleStart` overload are shown.
 
-![Planning and schedule projection classes](images/gabriel-planning-classes.svg)
+![Planning and schedule projection classes](images/diagrams/gabriel-planning-classes.svg)
 
 **Figure 5. Planning and schedule projection structure.**
 
-[PlantUML source](diagrams/gabriel-planning-classes.puml) · [PNG](images/gabriel-planning-classes.png)
+[PlantUML source](diagrams/gabriel-planning-classes.puml) · [PNG](images/diagrams/gabriel-planning-classes.png)
 
 Generation first classifies unfinished work: overdue and beyond-horizon tasks
 retain their full remainder; other work competes for chronological slots.
@@ -344,11 +344,11 @@ path. Exception paths and local helper calls remain omitted.
 The dispatcher renders and saves the plan before publishing the candidate
 snapshot and current plan.
 
-![Plan generation and persistence sequence](images/gabriel-planning-sequence.svg)
+![Plan generation and persistence sequence](images/diagrams/gabriel-planning-sequence.svg)
 
 **Figure 6. Successful plan generation, saving and publication.**
 
-[PlantUML source](diagrams/gabriel-planning-sequence.puml) · [PNG](images/gabriel-planning-sequence.png)
+[PlantUML source](diagrams/gabriel-planning-sequence.puml) · [PNG](images/diagrams/gabriel-planning-sequence.png)
 
 ### Persistence and the Snapshot aggregate
 
@@ -366,11 +366,11 @@ filesystem access, text conversion and aggregate validation:
 | [`Snapshot`](../src/main/java/scheduleflow/model/Snapshot.java) | Copies lists and validates the complete persisted aggregate. |
 | `StorageException` | Reports rejected loads/saves while retaining underlying causes where available. |
 
-![Persistence classes and their external model dependencies](images/ernest-storage-classes.svg)
+![Persistence classes and their external model dependencies](images/diagrams/ernest-storage-classes.svg)
 
 **Figure 7. Persistence and the source aggregate.**
 
-[PlantUML source](diagrams/ernest-storage-classes.puml) · [PNG](images/ernest-storage-classes.png). Dashed arrows denote use;
+[PlantUML source](diagrams/ernest-storage-classes.puml) · [PNG](images/diagrams/ernest-storage-classes.png). Dashed arrows denote use;
 solid arrows denote retained references. Other model dependencies appear as
 field types. `~PlanCodec` has package visibility; its members shown with `~` are
 also package-private.
@@ -439,11 +439,11 @@ For a nonblank line, the parser returns a `Command`; the dispatcher executes it
 against the same `AppState`. `ConsoleUi.write(response.output())` adds the final
 newline and flushes the response before `shouldExit()` is inspected.
 
-![Help command followed by a failed prompt and termination](images/ka-how-command-loop.svg)
+![Help command followed by a failed prompt and termination](images/diagrams/ka-how-command-loop.svg)
 
 **Figure 8. Help command followed by a failed prompt.**
 
-[PlantUML source](diagrams/ka-how-command-loop.puml) · [PNG](images/ka-how-command-loop.png)
+[PlantUML source](diagrams/ka-how-command-loop.puml) · [PNG](images/diagrams/ka-how-command-loop.png)
 
 Figure 8 follows one successful `help` command and then a failed prompt after restoration.
 The `runCommands` activation remains open while nested calls execute, and ends
@@ -593,11 +593,11 @@ non-console callers without pretending a parsed command is already valid.
 
 #### Exact progress and immutable candidates
 
-![Positive session progress creates a validated candidate before external publication](images/nickhil-task-progress.svg)
+![Positive session progress creates a validated candidate before external publication](images/diagrams/nickhil-task-progress.svg)
 
 **Figure 9. Positive session progress and task replacement.**
 
-[PlantUML source](diagrams/nickhil-task-progress.puml) · [PNG](images/nickhil-task-progress.png)
+[PlantUML source](diagrams/nickhil-task-progress.puml) · [PNG](images/diagrams/nickhil-task-progress.png)
 
 Figure 9 follows a valid 61-minute session at 25% on an active task with 90
 minutes remaining. The 15-minute credit creates a new `Task`, whose header and
@@ -689,11 +689,11 @@ that a rejected or unsaved change never reaches the live state.
 Suppose C1 is `Lecture`, Monday 10:00–11:00 from 2026-11-02 until 2026-11-30, and the
 student enters `commitment edit C1 start/1030`.
 
-![Editing a commitment: validate, save, then publish](images/darren-commitment-edit.svg)
+![Editing a commitment: validate, save, then publish](images/diagrams/darren-commitment-edit.svg)
 
 **Figure 10. Successful commitment edit, saved before publication.**
 
-[PlantUML source](diagrams/darren-commitment-edit.puml) · [PNG](images/darren-commitment-edit.png)
+[PlantUML source](diagrams/darren-commitment-edit.puml) · [PNG](images/diagrams/darren-commitment-edit.png)
 
 Figure 10 shows a successful edit. Nested activations distinguish `execute`,
 `editCommitment` and `saveAndCommit`, and the service's `createEdit` and
@@ -1169,11 +1169,11 @@ is returned, there is no known temporary file to clean up. After write/move
 failure, cleanup is attempted once; a failed cleanup may leave an abandoned
 `.scheduleflow-*.tmp` sibling while retaining the original target.
 
-![Saving a frozen plan and its source with an atomic replacement](images/ernest-atomic-plan-save.svg)
+![Saving a frozen plan and its source with an atomic replacement](images/diagrams/ernest-atomic-plan-save.svg)
 
 **Figure 11. Successful atomic save of a frozen plan.**
 
-[PlantUML source](diagrams/ernest-atomic-plan-save.puml) · [PNG](images/ernest-atomic-plan-save.png). The diagram abbreviates
+[PlantUML source](diagrams/ernest-atomic-plan-save.puml) · [PNG](images/diagrams/ernest-atomic-plan-save.png). The diagram abbreviates
 static filesystem calls and follows a successful atomic replacement. `Files`
 is a class participant, and `PlanCodec` is created during `savePlan`, before
 `encode` is called. The operations collaborator forwards normal calls to
@@ -1329,7 +1329,9 @@ and failures only, set both `scheduleflow.level` and the handler level to
 
 Editable PlantUML sources and the shared `course-style.puml` are in
 `docs/diagrams`. Each figure has a numbered caption and links to its source and
-PNG; committed SVGs in `docs/images` are embedded in this guide.
+PNG. Rendered SVG/PNG pairs live together in `docs/images/diagrams`; the SVGs
+are embedded in this guide. Team profile assets, including the shared About Us
+placeholder, live separately in `docs/images/team`.
 
 Review notation against the course's [Modeling chapter](https://nus-cs2113-ay2627-s1.github.io/website/se-book-adapted/chapters/modeling.html)
 and [Week 11 DG review guidance](https://nus-cs2113-ay2627-s1.github.io/website/schedule/week11/tutorial.html).
@@ -1363,10 +1365,10 @@ node tools/render-uml.mjs --plantuml "PATH_TO_PLANTUML_JAR" --chrome "PATH_TO_CH
 
 Replace the two paths with installed PlantUML and Chrome locations. An existing
 Playwright-managed Chromium can be used by omitting `--chrome`. Use `--output DIR`
-to preview exports outside `docs/images`. The common include is a style file,
-not a standalone diagram. Captions belong in the guide so that titles cannot
-change export names. The Windows PlantUML distribution used here supplies
-Graphviz; other installations may require it separately.
+to preview exports outside the default `docs/images/diagrams` folder. The common
+include is a style file, not a standalone diagram. Captions belong in the guide
+so that titles cannot change export names. The Windows PlantUML distribution
+used here supplies Graphviz; other installations may require it separately.
 
 PlantUML draws structural note arrows directly. Its sequence notes have no
 connector, so [`tools/render-uml.mjs`](../tools/render-uml.mjs) adds dotted arrows

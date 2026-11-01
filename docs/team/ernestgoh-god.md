@@ -75,6 +75,6 @@ For release hardening, I added a package-private filesystem-operation seam and r
 [dg-verification]: ../DeveloperGuide.md#storage-diagnostics-and-compatibility-verification
 [dg-nfr]: ../DeveloperGuide.md#appendix-c-non-functional-requirements
 [dg-manual]: ../DeveloperGuide.md#saving-restoration-failure-and-recovery
-[class-diagram]: ../images/ernest-storage-classes.svg
-[sequence-diagram]: ../images/ernest-atomic-plan-save.svg
+[class-diagram]: ../images/diagrams/ernest-storage-classes.svg
+[sequence-diagram]: ../images/diagrams/ernest-atomic-plan-save.svg
 [release-hardening]: ../release/ernest-storage-handoff.md

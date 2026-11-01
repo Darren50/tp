@@ -127,8 +127,8 @@ tests do not claim actual broken-pipe or cross-platform evidence.
 [console-source]: ../../src/main/java/scheduleflow/cli/ConsoleUi.java
 [console-tests]: ../../src/test/java/scheduleflow/cli/ConsoleUiTest.java
 [main-tests]: ../../src/test/java/scheduleflow/MainTest.java
-[current-class-diagram]: ../images/ka-how-console-classes.svg
-[current-sequence-diagram]: ../images/ka-how-command-loop.svg
+[current-class-diagram]: ../images/diagrams/ka-how-console-classes.svg
+[current-sequence-diagram]: ../images/diagrams/ka-how-command-loop.svg
 [issue18]: https://github.com/AY2627S1-CS2113-T10-1/tp/issues/18
 [issue65]: https://github.com/AY2627S1-CS2113-T10-1/tp/issues/65
 [issue67]: https://github.com/AY2627S1-CS2113-T10-1/tp/issues/67
