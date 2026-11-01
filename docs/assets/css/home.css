@@ -1,0 +1,89 @@
+/* @@author ernestgoh-god */
+/* Apply the compact landing-page layout without restyling the guides. */
+body:has(.sf-home) {
+  border-top: 5px solid #424242;
+}
+.container-lg:has(> .sf-home) {
+  margin-top: 0 !important;
+  max-width: 800px;
+}
+/* The Pages theme inserts a repository-name heading before page content. */
+.container-lg:has(> .sf-home) > h1:first-child {
+  display: none;
+}
+.sf-home {
+  color: #202020;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+.sf-home a {
+  color: #0673c9;
+}
+.sf-home a:focus-visible {
+  outline: 3px solid #805700;
+  outline-offset: 4px;
+}
+.sf-header {
+  align-items: center;
+  border-bottom: 1px solid #e5e5e5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  justify-content: space-between;
+  padding: 12px 0;
+}
+.sf-home .sf-brand {
+  color: #202020;
+  font-size: 24px;
+  font-weight: 300;
+}
+.sf-header nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+.sf-header nav a {
+  color: #202020;
+  font-size: 14px;
+}
+.sf-home h1 {
+  border: 0;
+  font-size: clamp(32px, 5vw, 42px);
+  font-weight: 400;
+  line-height: 1.2;
+  margin: 30px 0;
+  padding: 0;
+}
+.sf-home .sf-preview {
+  margin: 0 0 18px;
+}
+.sf-preview img {
+  border: 1px solid #d1d5da;
+  display: block;
+  height: auto;
+  max-width: 100%;
+  width: 100%;
+}
+.sf-preview figcaption {
+  color: #555;
+  font-size: 13px;
+  margin-top: 6px;
+}
+.sf-home .sf-acknowledgements h2 {
+  border: 0;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 20px 0 12px;
+  padding: 0;
+}
+@media (max-width: 640px) {
+  .sf-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .sf-header nav {
+    gap: 8px 16px;
+  }
+}
+/* @@author */
