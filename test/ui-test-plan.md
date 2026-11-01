@@ -13,7 +13,7 @@ exact output, invalid values, plan invalidation, replanning and saved data after
 two restarts. Save failure is covered by an isolated dispatcher fake because
 process-level fault injection is unavailable.
 
-All twenty-eight maintained process scenarios are active. They exercise the packaged
+All thirty-six maintained process scenarios are active. They exercise the packaged
 JAR in fresh temporary folders, with restart sessions sharing only their own
 saved data. Review this plan and `ui-scenarios.json` after each coherent code
 update. The fixtures are the executable source of truth for exact responses.
@@ -70,7 +70,7 @@ Use `./gradlew` on Unix. If needed, set `GRADLE_USER_HOME` to a writable cache.
 The three-OS CI workflow now runs the same sequence with Java 25 and Node 22,
 after printing runtime versions. It selects the OS-appropriate wrapper and
 retains JUnit/Checkstyle reports and console/release transcripts on failure.
-The active fixture list contains 34 release scenarios. The separate range-plan
+The active fixture list contains 36 release scenarios. The separate range-plan
 file is retained as an empty valid fixture after UI-022 through UI-027 moved into
 the main suite. Adding these CI steps does not by itself certify hosted matrix
 results. Runtime saved data and diagnostic logs are not CI artifacts.
@@ -134,6 +134,7 @@ optional/completed restored-data compatibility case and exact-minute restart che
 
 | ID | Coverage | Status |
 | --- | --- | --- |
+| UI-036 | Edit skipped commitments across weekday/range changes, retain applicable cancellations, preserve plans on rejection and save across two restarts | Active |
 | UI-030 | Minute/session progress, rounded and zero credit, invalid values, completion, plan invalidation and two saved restarts | Active |
 | UI-021 | Unavailable study period: custom hours, add/delete plan invalidation, restart and released interval | Active |
 | UI-020 | Restored optional/completed tasks, exact work and saved restart | Active |
@@ -313,11 +314,24 @@ argument-error paths, asserting status 1 and quiet stderr. An unrelated unchecke
 storage I/O defect must still propagate. The process fixtures need no output
 changes and do not claim real device-failure or other-platform coverage.
 
+<!-- @@author ka-how -->
+UI-035 rejects a structurally valid plan whose session credits 60 minutes against
+a 30-minute source task. It asserts exact startup error, exit 1, no prompt and
+quiet stderr. MainTest and the packaged release test also compare saved bytes
+after rejection. UI-031/UI-032 retain valid frozen restart coverage. Task/parser
+regressions additionally cover lifecycle after template deletion and excluded
+domain-only console APIs; existing process output is unchanged.
+`TextRendererTest` checks both unavailable help lines with their complete syntax
+and distinct continuous/daily descriptions. The six range cases remain active.
+
 Time-sensitive task/planning checks use fixed clocks through injected APIs;
-there is no production clock flag. `FileStorageTest` covers deterministic
-filesystem and replacement failures. Injected temporary-write failures and
-unsupported-atomic-move release checks remain unexecuted; fake-storage rollback
-is not evidence of those provider failures.
+there is no production clock flag. FileStorageTest traverses real transaction
+control flow with injected partial writes, unsupported atomic moves, replacement
+errors and failed cleanup. Load/save regressions now reject impossible plans
+through Planner.validate. Actual provider-specific failures, other operating
+systems and power-loss behavior remain unverified. Fake-storage rollback and
+injected operations do not establish those results.
+<!-- @@author -->
 
 The supplied contract's section 7 uses a different persistence format and
 forced flushing from the committed Save module. These fixtures use the actual

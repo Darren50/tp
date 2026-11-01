@@ -1,8 +1,18 @@
+---
+title: ScheduleFlow Developer Guide
+description: Design, implementation, verification and manual testing of the ScheduleFlow Java 25 console application.
+---
+
 # Developer Guide
 
 ScheduleFlow is a Java 25 console application for university students planning
 coursework around fixed commitments. For commands and user examples, see the
 [User Guide](UserGuide.md).
+
+> **Guide scope:** This guide describes the current source build. Build and test
+> the same revision when following it. Published v2.0 predates the multi-date
+> unavailable commands; publish a matching release and updated GitHub Pages
+> guide together before submission.
 
 ## Contents
 
@@ -35,6 +45,13 @@ coursework around fixed commitments. For commands and user examples, see the
 
 ## Acknowledgements
 
+The repository is based on the
+[CS2113 Duke project template](https://github.com/NUS-CS2113-AY2627-S1/tp).
+The Gradle wrapper/build layout, Checkstyle configuration and GitHub Actions
+setup were adapted from that starter; the build and CI now target Java 25 and
+include ScheduleFlow's verification. The starter's Duke demonstration was
+replaced by the `scheduleflow` application.
+
 ScheduleFlow uses [Gradle](https://gradle.org/) and the
 [Shadow plugin](https://gradleup.com/shadow/) to build and package its executable
 JAR, [JUnit 5](https://junit.org/junit5/) for Java tests, and
@@ -50,6 +67,8 @@ That credit concerns documentation structure; the console design described here
 uses ScheduleFlow's actual classes. The UML figures use
 [PlantUML](https://plantuml.com/) and the
 [SE Education PlantUML tutorial](https://se-education.org/guides/tutorials/plantUml.html).
+Diagram rendering also uses [Graphviz](https://graphviz.org/) for layout and
+[Playwright](https://playwright.dev/) to export the SVG/PNG pairs through Chrome.
 The repository's local skills record the
 [SE Education Java conventions](https://se-education.org/guides/conventions/java/intermediate.html),
 [Git conventions](https://se-education.org/guides/conventions/git.html), and
@@ -58,9 +77,9 @@ used during development.
 
 The [code-authorship allocation](#code-authorship) identifies maintenance
 responsibilities. Reassigned whole-file tags do not establish who originally
-implemented an enhancement; Git history retains that provenance. Before release,
-contributors must supply credits for any additional copied or adapted material
-so its source and extent can be acknowledged accurately.
+implemented an enhancement; Git history retains that provenance. When reusing
+additional code, ideas or documentation, add its source and the extent of reuse
+here in the same change.
 
 ## Setting up, getting started
 
@@ -90,11 +109,11 @@ the team's ownership allocation.
 
 ### System overview and collaboration boundaries
 
-![ScheduleFlow component architecture](images/architecture.svg)
+![ScheduleFlow component architecture](images/diagrams/architecture.svg)
 
 **Figure 1. Component architecture and selected source dependencies.**
 
-[PlantUML source](diagrams/architecture.puml) · [PNG](images/architecture.png)
+[PlantUML source](diagrams/architecture.puml) · [PNG](images/diagrams/architecture.png)
 
 The console application coordinates the domain services and persistence.
 Services produce immutable candidates; the dispatcher saves and then publishes
@@ -128,11 +147,11 @@ denote retained references; dashed dependencies denote creation or use.
 `...` marks omitted parameters. Service, codec, clock and transport-use
 dependencies are omitted to keep this view focused.
 
-![Console shell classes, command transports and external collaborators](images/ka-how-console-classes.svg)
+![Console shell classes, command transports and external collaborators](images/diagrams/ka-how-console-classes.svg)
 
 **Figure 2. Console shell, command values and collaborators.**
 
-[PlantUML source](diagrams/ka-how-console-classes.puml) · [PNG](images/ka-how-console-classes.png)
+[PlantUML source](diagrams/ka-how-console-classes.puml) · [PNG](images/diagrams/ka-how-console-classes.png)
 
 [`Main`](../src/main/java/scheduleflow/Main.java) supplies UTF-8 streams,
 `Clock.systemDefaultZone()` and `FileStorage` for `data/scheduleflow.txt` relative
@@ -161,30 +180,31 @@ whose nested records carry requests, for example `Help`, `AddTask` and
 Nickhil's parser and domain rules to the services. `CommandResponse(output,
 shouldExit)` carries the dispatcher's formatted result and termination decision
 back to `App`. The diagram shows only representative records; the two unavailable
-range transports exist but their console routes remain unfinished.
+range transports execute atomic batch additions; active UI-022 through UI-027
+cover their confirmations, rejection and restarts.
 
 ### Task model and command parsing
 
-**Candidate scope:** the Task sections describe source revision `f7d21f4`,
-checked for the upcoming release, not the published v1.0 JAR. Reconcile these
-claims with the actual release artifact before publication. The implementation
+<!-- @@author nickpatt -->
+See [task/parser verification](#taskparser-validation-and-junitdocumentation-conventions)
+for coverage and test commands. The implementation
 explanation concerns the Task lifecycle enhancement; the later whole-file
 allocation also assigns the complete parser to Nickhil, but does not establish
 who originally wrote every parser or integration method.
 
-![Task lifecycle and parser classes, with external aggregate and transport types](images/nickhil-task-parser-classes.svg)
+![Task lifecycle and parser classes, with external aggregate and transport types](images/diagrams/nickhil-task-parser-classes.svg)
 
 **Figure 3. Task model, lifecycle service and parser dependencies.**
 
-[PlantUML source](diagrams/nickhil-task-parser-classes.puml) · [PNG](images/nickhil-task-parser-classes.png)
+[PlantUML source](diagrams/nickhil-task-parser-classes.puml) · [PNG](images/diagrams/nickhil-task-parser-classes.png)
 
 The two groups have different responsibilities. The stateless
 [`CommandParser`](../src/main/java/scheduleflow/cli/CommandParser.java) matches
 the entire input and constructs Ka How's nested `Command` records. It does not
 look up IDs, read a clock, save data or invoke a service. `ParseException`
 preserves a message and the recognized command's usage hint. This applies to
-all command families, not just tasks; a syntactically recognized unavailable
-range command is not evidence that its deferred dispatch is implemented.
+all command families, not just tasks. Both unavailable range transports have
+separate dispatcher/service acceptance; parser tests establish syntax only.
 
 [`TaskService`](../src/main/java/scheduleflow/task/TaskService.java) reads
 Ernest's immutable `Snapshot` and returns a validated candidate or the identical
@@ -202,25 +222,30 @@ Gabriel owns template generation and the provenance type; Nickhil's service
 preserves that provenance when changing an already-generated task. Snapshot
 validation and storage remain external. The diagram intentionally omits
 repetitive accessors, parser patterns and constructor overloads.
+<!-- @@author -->
 
 ### Commitments and command execution
 
 This component has two jobs. It models the student's fixed commitments, and it
-executes every parsed command as one transaction: validate, save, then publish.
+routes every parsed command. Changed source data is validated, saved, then
+published; read-only commands and recognized no-ops do not save.
 The class view shows commitment and dispatch types and the collaborators the
 dispatcher holds. Solid arrows are retained references; dashed arrows are use or
 creation. Colours are shared with the other views; contributor names remain in
 the ownership table, outside the UML model.
 
-![Commitment and dispatch classes with their external collaborators](images/darren-commitment-dispatch-classes.svg)
+![Commitment and dispatch classes with their external collaborators](images/diagrams/darren-commitment-dispatch-classes.svg)
 
 **Figure 4. Commitment service and dispatcher collaborators.**
 
-[PlantUML source](diagrams/darren-commitment-dispatch-classes.puml) · [PNG](images/darren-commitment-dispatch-classes.png)
+[PlantUML source](diagrams/darren-commitment-dispatch-classes.puml) · [PNG](images/diagrams/darren-commitment-dispatch-classes.png)
+
+Selected operations abbreviate additional parameters with `...` to keep the
+class view readable; the linked service source supplies complete signatures.
 
 | Type | Responsibility |
 | --- | --- |
-| [`Commitment`](../src/main/java/scheduleflow/model/Commitment.java) | Immutable record of one fixed commitment. Its compact constructor validates the name, half-hour start, positive 30-minute-multiple duration, same-day end, date range and skipped dates. `occursOn(date)` and `overlaps(other)` are the only calendar-membership and conflict rules used elsewhere. |
+| [`Commitment`](../src/main/java/scheduleflow/model/Commitment.java) | Immutable record of one fixed commitment. Its compact constructor validates the name, half-hour start, positive 30-minute-multiple duration, same-day end, date range and skipped dates. `recursOn(date)` checks the underlying series, `occursOn(date)` also excludes skipped dates, and `overlaps(other)` checks actual shared occurrences. |
 | [`CommitmentService`](../src/main/java/scheduleflow/commitment/CommitmentService.java) | Stateless operations (`add`, `addContinuousBlock`, `addDailyBlocks`, `edit`, `skip`, `delete`, `list`) that take a `Snapshot` and return a complete candidate `Snapshot` or an ordered view. It never saves, publishes or reads the clock. |
 | [`CommandDispatcher`](../src/main/java/scheduleflow/cli/CommandDispatcher.java) | Routes each nested `Command` record to one handler, captures the command time once, and owns the save-before-publication transaction for every mutating command, not only commitments. |
 
@@ -239,7 +264,7 @@ a time slot while still rejecting real clashes.
 
 The dispatcher separates three steps that other components keep apart too.
 A service validates and returns a candidate, but nothing changes yet. `Storage.save`
-then makes the candidate durable, using Ernest's [atomic persistence](#atomic-persistence-and-restoring-frozen-plans).
+then writes the candidate through Ernest's [atomic persistence](#atomic-persistence-and-restoring-frozen-plans).
 Only after that does `AppState.commit` publish it and clear the now-stale plan.
 The dispatcher reuses other members' services rather than duplicating their rules:
 task changes come from Nickhil's `TaskService`, recurring occurrences and plans
@@ -250,8 +275,9 @@ from Gabriel's `RecurringTaskService` and `Planner`, and output text from Ka How
 
 `EarliestDeadlinePlanner` creates chronological half-hour slots from the
 captured command time through the rolling calendar-year horizon. It excludes
-recurring commitments, skips zero-remaining completed tasks, sorts dated tasks by
-deadline, priority then numeric ID, followed by undated tasks by priority/ID, and assigns
+all occurring commitments (weekly or one-time), skips zero-remaining completed
+tasks, sorts dated tasks by deadline, priority then numeric ID, followed by
+undated tasks by priority/ID, and assigns
 each eligible task to its earliest free slots. Overdue and out-of-horizon
 tasks keep their full work estimate as unallocated; eligible tasks retain any
 sessions that fit before their deadline. Undated tasks use the same finite horizon
@@ -270,8 +296,10 @@ cutoff rounding, clipping, midnight commitments and allowed schedule dates.
 `Planner.validate(Plan)` is the pure cross-record boundary. It checks the frozen
 source and generation time, not the current clock, without regenerating work.
 `EarliestDeadlinePlanner.generate` calls it before returning every result.
-Storage integration is assigned to Ernest and remains pending until his codecs
-call this boundary; raw `Plan` construction retains its lightweight contract.
+<!-- @@author GabrielYuSP -->
+Ernest's codecs call this boundary before encoding and after decoding frozen
+plans; raw `Plan` construction retains its lightweight contract.
+<!-- @@author -->
 
 `Planner` is implemented by `EarliestDeadlinePlanner`. `TimeRules` defines
 cutoff and horizon calculations. `StudyHours`/`StudyWindow` supply daily
@@ -304,17 +332,17 @@ fallback, while the snapshot's policy is the saved setting. Shared immutable
 records use associations rather than exclusive-lifetime composition. Only selected
 members and the window-aware `eligibleStart` overload are shown.
 
-![Planning and schedule projection classes](images/gabriel-planning-classes.svg)
+![Planning and schedule projection classes](images/diagrams/gabriel-planning-classes.svg)
 
 **Figure 5. Planning and schedule projection structure.**
 
-[PlantUML source](diagrams/gabriel-planning-classes.puml) · [PNG](images/gabriel-planning-classes.png)
+[PlantUML source](diagrams/gabriel-planning-classes.puml) · [PNG](images/diagrams/gabriel-planning-classes.png)
 
 Generation first classifies unfinished work: overdue and beyond-horizon tasks
 retain their full remainder; other work competes for chronological slots.
 Dated tasks are ordered by deadline, priority and numeric ID, followed by
 undated tasks ordered by priority and ID. A slot must fit wholly inside that
-date's study window, start after the rounded generation cutoff and any
+date's study window, start at or after the rounded generation cutoff and any
 occurrence release, end no later than the task deadline, and not overlap a
 fixed commitment. Required breaks reserve capacity too.
 
@@ -338,16 +366,15 @@ path. Exception paths and local helper calls remain omitted.
 The dispatcher renders and saves the plan before publishing the candidate
 snapshot and current plan.
 
-![Plan generation and persistence sequence](images/gabriel-planning-sequence.svg)
+![Plan generation and persistence sequence](images/diagrams/gabriel-planning-sequence.svg)
 
 **Figure 6. Successful plan generation, saving and publication.**
 
-[PlantUML source](diagrams/gabriel-planning-sequence.puml) · [PNG](images/gabriel-planning-sequence.png)
+[PlantUML source](diagrams/gabriel-planning-sequence.puml) · [PNG](images/diagrams/gabriel-planning-sequence.png)
 
 ### Persistence and the Snapshot aggregate
 
-This section describes the current source implementation, not the older v1.0
-JAR. The persistence boundary separates
+The persistence boundary separates
 filesystem access, text conversion and aggregate validation:
 
 | Type | Responsibility |
@@ -360,11 +387,11 @@ filesystem access, text conversion and aggregate validation:
 | [`Snapshot`](../src/main/java/scheduleflow/model/Snapshot.java) | Copies lists and validates the complete persisted aggregate. |
 | `StorageException` | Reports rejected loads/saves while retaining underlying causes where available. |
 
-![Persistence classes and their external model dependencies](images/ernest-storage-classes.svg)
+![Persistence classes and their external model dependencies](images/diagrams/ernest-storage-classes.svg)
 
 **Figure 7. Persistence and the source aggregate.**
 
-[PlantUML source](diagrams/ernest-storage-classes.puml) · [PNG](images/ernest-storage-classes.png). Dashed arrows denote use;
+[PlantUML source](diagrams/ernest-storage-classes.puml) · [PNG](images/diagrams/ernest-storage-classes.png). Dashed arrows denote use;
 solid arrows denote retained references. Other model dependencies appear as
 field types. `~PlanCodec` has package visibility; its members shown with `~` are
 also package-private.
@@ -379,22 +406,24 @@ order and are immutable; deleting all records does not reset counters.
 
 A `Snapshot` is source data. A `Plan` additionally freezes generation time,
 sessions, unallocated work and breaks against that source. Ka How's `AppState`
-holds the session's live snapshot and optional plan; storage neither publishes
-that state nor invokes the planner.
+holds the session's live snapshot and optional plan; storage does not publish
+that state or regenerate schedules.
 
-Full cross-record frozen-plan validation is a pending release dependency:
-Gabriel's tested `Planner.validate(Plan)` API is now available after integration,
-but the codecs do not yet invoke it. They retain their existing structural/reference checks;
-they do not yet reject every impossible allocation. No substitute allocation
-validator is implemented in storage.
+<!-- @@author ernestgoh-god -->
+`PlanCodec` calls Gabriel's pure `Planner.validate(Plan)` boundary before
+encoding and after decoding. Allocation rules remain in planning: infeasible
+intervals, overlaps, incorrect remainders and unbalanced work reject the complete
+plan with `StorageException` retaining the validation cause. Valid alternative
+frozen allocations remain unchanged; validation never reads today's clock.
+<!-- @@author -->
 
 ## Implementation
 
-These sections describe the important state transitions and failure
-boundaries. Proposed console operations are explicitly labelled.
+These sections describe the implemented state transitions and failure boundaries.
+Domain APIs that have no console command are identified explicitly.
 
 Each section traces one enhancement and links to the others instead of
-repeating them. A typical mutating command crosses all five:
+repeating them. A typical mutating command follows these stages:
 
 1. [Console interaction](#recoverable-console-interaction-and-deterministic-rendering)
    reads and parses the line and later prints the response.
@@ -431,11 +460,11 @@ For a nonblank line, the parser returns a `Command`; the dispatcher executes it
 against the same `AppState`. `ConsoleUi.write(response.output())` adds the final
 newline and flushes the response before `shouldExit()` is inspected.
 
-![Help command followed by a failed prompt and termination](images/ka-how-command-loop.svg)
+![Help command followed by a failed prompt and termination](images/diagrams/ka-how-command-loop.svg)
 
 **Figure 8. Help command followed by a failed prompt.**
 
-[PlantUML source](diagrams/ka-how-command-loop.puml) · [PNG](images/ka-how-command-loop.png)
+[PlantUML source](diagrams/ka-how-command-loop.puml) · [PNG](images/diagrams/ka-how-command-loop.png)
 
 Figure 8 follows one successful `help` command and then a failed prompt after restoration.
 The `runCommands` activation remains open while nested calls execute, and ends
@@ -470,9 +499,8 @@ while the service and dispatcher establish candidate validation and rollback.
 | Output failure during a prompt, response, goodbye or error report | `ConsoleUi` detects the writer's error flag. `App` stops without reading another command or reporting the error to the failed writer. | Status 1; any already-saved command stays saved. |
 
 Unexpected programming exceptions propagate. In particular, a null dependency
-or a stale plan is not converted to an ordinary input error. (The unfinished
-range routes deliberately throw `ValidationException`, so they are reported as
-ordinary errors.) Extra process arguments are rejected by `Main` before loading,
+or a stale plan is not converted to an ordinary input error. Invalid range
+requests use domain validation; valid batches save once before publication. Extra process arguments are rejected by `Main` before loading,
 with `Error: Usage: java -jar scheduleflow.jar (no arguments)` and status 1.
 `App` returns status codes so tests and embedded callers need not terminate
 their JVM; only `Main` calls `System.exit`.
@@ -555,14 +583,15 @@ diagnostic severity text and keeps logger configuration inside that process.
 
 ### Exact task work and retained task lifecycle
 
+<!-- @@author nickpatt -->
 The enhancement lets a student record actual work without losing task identity
 or confusing remaining work with scheduled capacity. Suppose T1 has 90 minutes
 remaining. A reported 61-minute session at 25% credits **15**, leaving **75**.
 The percentage describes that session, not the original task estimate. Planning
 may reserve 90 minutes for the resulting 75-minute estimate, but does not alter
 it. See [allocation](#slot-allocation-under-study-hourspolicy-and-recurrence) for
-capacity accounting and [the candidate scope](#task-model-and-command-parsing)
-for release status and contribution boundaries.
+capacity accounting and [task design](#task-model-and-command-parsing)
+for component and contribution boundaries.
 
 #### Parsing and domain validation
 
@@ -585,11 +614,11 @@ non-console callers without pretending a parsed command is already valid.
 
 #### Exact progress and immutable candidates
 
-![Positive session progress creates a validated candidate before external publication](images/nickhil-task-progress.svg)
+![Positive session progress creates a validated candidate before external publication](images/diagrams/nickhil-task-progress.svg)
 
 **Figure 9. Positive session progress and task replacement.**
 
-[PlantUML source](diagrams/nickhil-task-progress.puml) · [PNG](images/nickhil-task-progress.png)
+[PlantUML source](diagrams/nickhil-task-progress.puml) · [PNG](images/diagrams/nickhil-task-progress.png)
 
 Figure 9 follows a valid 61-minute session at 25% on an active task with 90
 minutes remaining. The 15-minute credit creates a new `Task`, whose header and
@@ -640,6 +669,10 @@ remain in `task list`; the dispatcher implements the completed-only view using
 the service's numeric-ID list. A generated task has the same lifecycle, but its
 original release and template provenance survive every replacement. These
 mutations neither generate occurrences nor modify Gabriel's templates.
+Deleting a template also retains its generated tasks. Progress, completion,
+reopening and edits continue to work on those records without the live template;
+their original occurrence release remains unchanged even when the visible
+deadline changes. No deleted template is recreated by a task mutation.
 
 Only a changed, present deadline is checked against
 `now < deadline <= TimeRules.horizonEnd(now)`. Renaming an overdue task or retaining
@@ -662,13 +695,14 @@ the single completion authority. Rejecting excess credit exposes an inaccurate
 report instead of silently losing its meaning. The design intentionally stores
 neither an original-work baseline nor a timer/history, so it cannot report a
 whole-task completion percentage or reconstruct earlier estimates.
+<!-- @@author -->
 
 ### Dated commitments and save-before-publication dispatch
 
 Students' fixed time changes in irregular ways: a lecture series ends mid-semester,
 one tutorial is cancelled, or a single afternoon becomes unavailable. This
 enhancement lets one `Commitment` record represent weekly, date-bounded and
-one-time time, checks conflicts against actual calendar dates, and guarantees
+one-time intervals, checks conflicts against actual calendar dates, and guarantees
 that a rejected or unsaved change never reaches the live state.
 
 #### Walkthrough: editing a commitment
@@ -676,11 +710,11 @@ that a rejected or unsaved change never reaches the live state.
 Suppose C1 is `Lecture`, Monday 10:00–11:00 from 2026-11-02 until 2026-11-30, and the
 student enters `commitment edit C1 start/1030`.
 
-![Editing a commitment: validate, save, then publish](images/darren-commitment-edit.svg)
+![Editing a commitment: validate, save, then publish](images/diagrams/darren-commitment-edit.svg)
 
 **Figure 10. Successful commitment edit, saved before publication.**
 
-[PlantUML source](diagrams/darren-commitment-edit.puml) · [PNG](images/darren-commitment-edit.png)
+[PlantUML source](diagrams/darren-commitment-edit.puml) · [PNG](images/diagrams/darren-commitment-edit.png)
 
 Figure 10 shows a successful edit. Nested activations distinguish `execute`,
 `editCommitment` and `saveAndCommit`, and the service's `createEdit` and
@@ -727,12 +761,14 @@ IDs stop at `2147483646`; the exhausted next counter is `2147483647`.
 #### Commitment editing
 
 `CommitmentService.edit` accepts an existing numeric ID and nullable replacement
-fields: name, weekday, start and boxed duration. Null means omitted; a blank name
-is not an omission. It rejects empty edits and unknown/nonpositive IDs, resolves
+fields: name, weekday, start, boxed duration and paired date bounds. Null means
+omitted; a blank name is not an omission. It rejects empty edits and
+unknown/nonpositive IDs, resolves
 omissions from the original record, and constructs one validated replacement.
 The existing model and overlap helper remain the validation authorities. Only
 the target ID is excluded from conflict checks. Stored position, other records,
-tasks and both counters are preserved, even when the next ID is exhausted.
+tasks, templates, settings and all three counters are preserved, even when an
+ID sequence is exhausted.
 No delete/add intermediate state or storage-format change is required.
 The edit candidate explicitly carries the source study-hours settings; using the
 legacy four-argument snapshot constructor here would silently restore defaults.
@@ -740,8 +776,9 @@ A regression test round-trips both weekday and dated settings after editing.
 UI-014 also checks settings survive an edit and a fresh process restart.
 
 `Command.EditCommitment` transports partial values. The parser accepts subsets
-in `n/`, `day/`, `start/`, `d/` order with the existing strict weekday/time/integer
-rules. It rejects repeated, reordered and unknown fields. Domain validation,
+in `n/`, `day/` or `on/`, `start/`, `d/`, then paired `from/` and `until/`
+order with the strict weekday/date/time/integer rules. It rejects repeated,
+reordered and unknown fields. Domain validation,
 including empty-edit rejection, remains in the service. The dispatcher resolves
 the replacement before the existing save-and-commit transaction and reports it
 through `TextRenderer.commitmentEdited`. Even identical-value valid edits save
@@ -770,13 +807,17 @@ use version 2 on new saves.
 `Commitment` stores an immutable set of skipped calendar dates. `recursOn`
 checks the weekday and optional inclusive bounds without exceptions, while
 `occursOn` additionally excludes skipped dates. The constructor rejects a
-skipped date outside the series or on another weekday. Editing retains the set,
-so an edit that would move an existing exception outside the resulting series
-is rejected instead of silently losing it.
+skipped date outside the series or on another weekday. Editing first validates
+the replacement without skips, then retains only dates for which that replacement's
+`recursOn` returns true. This lets a student change weekdays or shorten a semester
+after cancelling a class. Applicable calendar cancellations remain unchanged;
+obsolete ones are removed, and a one-time result retains none. Conflict checking
+uses the complete replacement with its retained skips before returning a candidate.
 
 `CommitmentService.skip` resolves the stable ID, rejects non-occurrence and
 duplicate dates, and replaces the record at its original stored position. The
-candidate preserves tasks, study hours and both ID counters. The dispatcher
+candidate preserves tasks, templates, study hours, policy and all three ID
+counters. The dispatcher
 saves the candidate before publishing it or returning `Skipped CNUMBER on DATE: NAME`;
 therefore save failure leaves the live snapshot, current plan and saved data
 unchanged. The command grammar is `commitment skip CNUMBER on/YYYY-MM-DD`.
@@ -826,9 +867,9 @@ after the weekly groups, preserving the service's start/ID order within a date.
 
 #### Commitment deletion and listing
 
-`CommitmentService.delete` removes an entire weekly series by its stable numeric
-ID, returning an immutable candidate while preserving tasks, other commitments,
-their stored order and both ID counters. Nonpositive and unknown IDs raise
+`CommitmentService.delete` removes a weekly series or one-time commitment by its
+stable numeric ID, returning an immutable candidate while preserving tasks,
+other commitments, templates, settings, stored order and all three ID counters. Nonpositive and unknown IDs raise
 `ValidationException`. Deleting the last series does not reset the counter.
 `list` returns an immutable Monday-to-Sunday view sorted by start time and then
 numeric ID, without reordering the snapshot or renumbering records. Valid
@@ -846,8 +887,9 @@ command: `commitment add n/Unavailable on/YYYY-MM-DD start/HHmm d/MINUTES`.
 The name is an ordinary user description, not a reserved keyword. Equal
 inclusive date bounds represent the single unavailable occurrence, and
 `Commitment.occursOn(date)` supplies the same date membership check to the
-allocator and schedule projection. There is no separate availability model,
-new command or storage format for this workflow.
+allocator and schedule projection. This single-date workflow reuses the existing
+commitment command and storage format. For continuous or daily ranges, see
+[multi-date unavailable periods](#multi-date-unavailable-periods).
 
 A period may overlap previously allocated task sessions: commitment overlap
 validation checks fixed commitments, not temporary task allocations. The
@@ -907,6 +949,8 @@ step 4 fails, the previous snapshot, plan and file all remain current.
 `showSchedule` checks for a current plan before projecting a date, so "no current
 plan" takes precedence over date-range errors. Domain exceptions remain their
 owners' validation; the dispatcher neither catches nor rewords them.
+
+<a id="commitment-design-considerations"></a>
 
 #### Design considerations
 
@@ -1134,7 +1178,8 @@ its original sessions and generation time; reading it does not credit progress.
 Both save operations use `FileStorage.writeAtomically`:
 
 1. `save(snapshot)` calls `StateCodec.encode`; `savePlan(plan)` calls
-   `PlanCodec.encode`, which asks `StateCodec.encodeForPlan` for the full source.
+   `PlanCodec.encode`, which validates the allocation with `Planner.validate`
+   before asking `StateCodec.encodeForPlan` for the full source.
    Encoding completes before any filesystem preparation. Null arguments are
    rejected before filesystem changes.
 2. Create missing parent directories and a distinct sibling temporary file.
@@ -1155,11 +1200,11 @@ is returned, there is no known temporary file to clean up. After write/move
 failure, cleanup is attempted once; a failed cleanup may leave an abandoned
 `.scheduleflow-*.tmp` sibling while retaining the original target.
 
-![Saving a frozen plan and its source with an atomic replacement](images/ernest-atomic-plan-save.svg)
+![Saving a frozen plan and its source with an atomic replacement](images/diagrams/ernest-atomic-plan-save.svg)
 
 **Figure 11. Successful atomic save of a frozen plan.**
 
-[PlantUML source](diagrams/ernest-atomic-plan-save.puml) · [PNG](images/ernest-atomic-plan-save.png). The diagram abbreviates
+[PlantUML source](diagrams/ernest-atomic-plan-save.puml) · [PNG](images/diagrams/ernest-atomic-plan-save.png). The diagram abbreviates
 static filesystem calls and follows a successful atomic replacement. `Files`
 is a class participant, and `PlanCodec` is created during `savePlan`, before
 `encode` is called. The operations collaborator forwards normal calls to
@@ -1167,7 +1212,11 @@ is a class participant, and `PlanCodec` is created during `savePlan`, before
 [command transactions](#command-dispatch-and-live-state-transactions) for live
 publication: the dispatcher prepares recurrence/allocation/output, calls
 `savePlan` once, then publishes the saved source and plan. It does not save the
-source separately first. A rejected save leaves the previous live snapshot and
+source separately first. Cleanup belongs to filesystem failures inside
+`writeAtomically`; encoding/validation failures happen before that method and
+create no temporary file. `Planner` is a Java interface, shown as a class-level
+participant for its static validation call. A rejected save leaves the previous
+live snapshot and
 plan in use, allowing retry without consuming IDs or advancing template cursors.
 
 A successful `save(snapshot)` deliberately writes no plan. It removes a stale
@@ -1183,12 +1232,16 @@ UTF-8 and invalid records are failures. A broken symbolic link must not silently
 become an empty store. Loading itself creates no directories and rewrites no
 legacy data.
 
+<!-- @@author ernestgoh-god -->
 `StateCodec.decode` validates headers/records and constructs domain values and
 the complete `Snapshot`. Saved overdue tasks are valid: restoration does not
 repeat the time-dependent admission rule for adding a new task. For a plan file,
 decoding also checks metadata, counted rows, task references, matching remainder
-names/deadlines, interval bounds and result ordering. It does not rerun the
-allocator or prove every possible allocation relationship independently.
+names/deadlines, interval bounds and result ordering. `Planner.validate` then
+checks feasibility and work conservation against the frozen source/time. Encoding
+uses the same boundary before any directory or temporary file is created.
+Neither path reruns the allocator or materializes occurrences.
+<!-- @@author -->
 
 `App.run()` loads the snapshot and calls `loadPlan(source)` before the first
 prompt. `loadPlan` rereads the file and accepts only an equal embedded source;
@@ -1309,9 +1362,36 @@ and failures only, set both `scheduleflow.level` and the handler level to
 
 #### Diagram and guide maintenance
 
+Keep the User Guide's introduction, quick start, Features, troubleshooting,
+limitations and command summary aligned with the current executable. The
+[course UG requirements](https://nus-cs2113-ay2627-s1.github.io/website/admin/tp-deliverables.html#deliverable-user-guide-ug)
+require precise coverage of current features in `docs/UserGuide.md`, following
+the [AB3 UG structure](https://se-education.org/addressbook-level3/UserGuide.html).
+Review grammar against `CommandParser`, confirmations against `TextRenderer`,
+and behavior against the dispatcher, services and maintained JUnit/UI cases.
+Use fixed-clock tests for illustrative schedule timestamps; ordinary packaged
+launches use the real local clock. Keep existing section anchors stable when
+reorganizing headings, and refresh the companion PDF after text changes.
+
+Before submission, publish the updated guide on the product's GitHub Pages
+website and check its links against the actual release JAR. A locally verified
+source build does not establish that the published guide or an older release
+asset matches. In particular, v2.0 predates the multi-date unavailable commands.
+
+The [course DG requirements](https://nus-cs2113-ay2627-s1.github.io/website/admin/tp-deliverables.html#deliverable-developer-guide-dg)
+require Design, Implementation, Product Scope, User Stories, Non-Functional
+Requirements, Glossary and Instructions for Manual Testing in this file.
+Keep acknowledgements explicit about reused material and its extent. Maintain
+the PlantUML sources with their exports, and check Appendix E's setup, commands
+and expected results against the matching JAR. It covers every console command
+family; precise clock-dependent allocation and injected device/provider failures
+use the linked automated tests rather than unsupported manual claims.
+
 Editable PlantUML sources and the shared `course-style.puml` are in
 `docs/diagrams`. Each figure has a numbered caption and links to its source and
-PNG; committed SVGs in `docs/images` are embedded in this guide.
+PNG. Rendered SVG/PNG pairs live together in `docs/images/diagrams`; the SVGs
+are embedded in this guide. Team profile assets, including the shared About Us
+placeholder, live separately in `docs/images/team`.
 
 Review notation against the course's [Modeling chapter](https://nus-cs2113-ay2627-s1.github.io/website/se-book-adapted/chapters/modeling.html)
 and [Week 11 DG review guidance](https://nus-cs2113-ay2627-s1.github.io/website/schedule/week11/tutorial.html).
@@ -1345,10 +1425,10 @@ node tools/render-uml.mjs --plantuml "PATH_TO_PLANTUML_JAR" --chrome "PATH_TO_CH
 
 Replace the two paths with installed PlantUML and Chrome locations. An existing
 Playwright-managed Chromium can be used by omitting `--chrome`. Use `--output DIR`
-to preview exports outside `docs/images`. The common include is a style file,
-not a standalone diagram. Captions belong in the guide so that titles cannot
-change export names. The Windows PlantUML distribution used here supplies
-Graphviz; other installations may require it separately.
+to preview exports outside the default `docs/images/diagrams` folder. The common
+include is a style file, not a standalone diagram. Captions belong in the guide
+so that titles cannot change export names. The Windows PlantUML distribution
+used here supplies Graphviz; other installations may require it separately.
 
 PlantUML draws structural note arrows directly. Its sequence notes have no
 connector, so [`tools/render-uml.mjs`](../tools/render-uml.mjs) adds dotted arrows
@@ -1373,6 +1453,7 @@ establish those results.
 
 ### Task/parser validation and JUnit/documentation conventions
 
+<!-- @@author nickpatt -->
 Run the owned tests with Java 25 from the repository root:
 
 ```shell
@@ -1382,10 +1463,12 @@ Run the owned tests with Java 25 from the repository root:
 [`TaskServiceTest`](../src/test/java/scheduleflow/task/TaskServiceTest.java)
 checks 0/50/100% credit, floor rounding, large products, no-op identity,
 completion/reopening, and captured-time deadline boundaries. TaskRecurrenceTest
-checks generated-task metadata preservation; it does not replace Gabriel's
-generation tests. TaskEditTest and InputRulesTest cover transport/null rules and
+checks generated-task metadata preservation, including the complete lifecycle
+after template deletion with custom hours/policy and surrounding tasks; it does
+not replace Gabriel's generation tests. TaskEditTest and InputRulesTest cover transport/null rules and
 normalization. CommandParserTest covers all families' grammar and usage hints,
-not whether deferred commands execute. Tests use explicit times, temporary data,
+not command execution. Explicit rejection tests keep domain-only optional-deadline,
+deadline-clearing and priority APIs outside the console grammar. Tests use explicit times, temporary data,
 and restored logger/locale settings; see [test conventions](../src/test/AGENTS.md).
 Link documentation claims to those tests rather than adding tests for prose.
 
@@ -1396,16 +1479,18 @@ these classes install no handlers. Public validation works without `-ea`;
 assertions check internal invariants. Lifecycle methods do not all emit stage
 logs. [JUnit/documentation standards](../AGENTS.md) remain the authority for
 Javadoc, isolation and verification; builds alone are not manual acceptance.
+<!-- @@author -->
 
 ### Commitment/dispatch transaction verification
 
-Three JUnit classes cover this component, all with a fixed `Clock` and in-memory
-or temporary storage, so no test reads the real time or the developer's data:
+Three JUnit classes cover this component. Dispatcher tests use a fixed `Clock`
+and controlled storage; domain tests supply explicit dates without a clock or
+storage. None uses the real time or the developer's data:
 
 | Test class | Tests | What it establishes |
 | --- | --- | --- |
 | [`CommitmentTest`](../src/test/java/scheduleflow/model/CommitmentTest.java) | 13 | Record validation boundaries, `occursOn`/`recursOn`, adjacency versus overlap, shared-occurrence checks for bounded and skipped series. |
-| [`CommitmentServiceTest`](../src/test/java/scheduleflow/commitment/CommitmentServiceTest.java) | 52 | Each operation returns a candidate and leaves its source unchanged; conflict messages and ordering; edits keep position, ID and study hours; skip/one-time rules; counter exhaustion; unavailable-range expansion. |
+| [`CommitmentServiceTest`](../src/test/java/scheduleflow/commitment/CommitmentServiceTest.java) | 55 | Each operation returns a candidate and leaves its source unchanged; conflict messages and ordering; edits keep position, ID and study hours; skip/one-time rules, including weekday/range edits after skips; counter exhaustion; unavailable-range expansion. |
 | [`CommandDispatcherTest`](../src/test/java/scheduleflow/cli/CommandDispatcherTest.java) | 46 | Every route and a single clock read per command; save-before-publication for each mutation and unavailable batch; failed saves preserving state, plan, counters and retry IDs; no-op and read-only commands making no save; the one-`savePlan` planning transaction. |
 
 The dispatcher tests use an in-memory `FakeStorage` that records attempts and can
@@ -1416,6 +1501,10 @@ candidate is saved. `execute_planRejectedAfterMaterialization_preservesSourcePla
 covers a plan rejected after recurrence materialization. Packaged console
 scenarios UI-014 (partial edits, rejection, plan invalidation and restart) and
 UI-017 (occurrence skips and restart) exercise the same rules through the JAR.
+UI-036 checks edits after skips: shortened bounds retain only applicable
+cancellations, weekday changes remove obsolete cancellations, invalid edits keep
+the frozen plan, and the edited series survives two restarts. Service regressions
+also check that real conflicts still reject the edit and leave the source intact.
 UI-022 through UI-027 exercise both unavailable batch routes, rollback boundaries,
 restart persistence, independent deletion and calendar boundary cases.
 
@@ -1468,9 +1557,15 @@ add backup/transfer and an interactive rejected-save check. These new faults are
 injected at real transaction boundaries, not evidence of unsupported moves or
 cleanup denial on an actual provider. Other operating systems, real permission
 denial, unsupported providers and power-loss behavior still need separate
-evidence; the implementation makes no power-loss guarantee. Impossible-allocation
-load/save regressions remain pending Gabriel's planning validator; passing the
-existing codec checks does not close that release requirement.
+evidence; the implementation makes no power-loss guarantee.
+
+<!-- @@author ernestgoh-god -->
+`PlanCodecTest` rejects duplicate/missing/excess work, overlapping sessions,
+post-deadline work and pre-cutoff sessions, retaining validation causes through
+`StateCodec.decode`. Valid non-greedy plans and legacy/current formats round-trip.
+`FileStorageTest` verifies both load paths preserve impossible input bytes and
+invalid plans fail before filesystem changes or replacement of a valid plan.
+<!-- @@author -->
 
 #### Storage defensive checks and diagnostics
 
@@ -1521,41 +1616,48 @@ Schedules stay frozen until regenerated or invalidated by a successful change.
 
 The application is a single-user, local/offline application with one
 running instance per data file. It has no calendar synchronization, GUI,
-notifications or automatic progress timer. Multi-date unavailable commands
-remain proposed console integration; see the [User Guide](UserGuide.md) for
-the supported command surface.
+notifications or automatic progress timer. Multi-date unavailable requests are
+supported through the continuous and daily commands; see
+[blocking multiple dates](UserGuide.md#blocking-multiple-dates) for their syntax
+and atomic behavior.
 
 ## Appendix B: User Stories
 
-These are product stories, not a redistribution of implementation credit.
-**Candidate** means supported by the inspected source, newer than published
-v1.0; **Planned** means not a working console feature. Feature owners should
-review their rows against the final release tag before publication.
+<!-- @@author nickpatt -->
+These stories describe implemented console behavior in the source build covered
+by this guide. They do not assign implementation credit or imply that an older
+published JAR supports every command.
 
 | Status | As a... | I want to... | So that I can... |
 | --- | --- | --- | --- |
-| Candidate | new user | launch locally and request help | learn the accepted commands without leaving the terminal. |
-| Candidate | student | add and list coursework with deadlines and exact estimates | keep an identifiable record of unfinished work. |
-| Candidate | student with changed requirements | edit task details | correct my plan inputs without replacing task IDs. |
-| Candidate | student working across sessions | report completed minutes or a session percentage | keep the remaining estimate accurate. |
-| Candidate | student revising an estimate | replace remaining work without recording progress | account for newly discovered work. |
-| Candidate | student finishing an assignment | retain a completed task and view completed work | distinguish completion from permanent removal. |
-| Candidate | student correcting mistaken completion | reopen a task with an explicit estimate | return its remaining work to planning. |
-| Candidate | student | permanently delete unwanted tasks | remove work I no longer need to schedule. |
-| Candidate | student with weekly coursework | create a weekly task template | avoid re-entering each occurrence. |
-| Candidate | student with fixed classes or meetings | manage weekly, bounded and one-time commitments | prevent study sessions from overlapping busy time. |
-| Candidate | student whose class is cancelled | skip one commitment occurrence | release that date without deleting the series. |
-| Candidate | unexpectedly busy student | block one date through a one-time commitment | move study work into other available periods. |
-| Candidate | student with a regular routine | configure weekday hours and date overrides | plan within realistic study windows. |
-| Candidate | student needing rest | configure work limits and breaks | avoid excessive continuous study. |
-| Candidate | student balancing deadlines | generate a plan and view daily schedules | see when to work and which work does not fit. |
-| Candidate | returning student | restore records, settings and the exact saved plan | continue without re-entry or a changed schedule. |
-| Candidate | student encountering invalid input or a rejected save | receive an error without partial changes | correct and safely retry the request. |
-| Planned | student unavailable across multiple dates | submit a continuous or daily unavailable range | avoid entering each date separately once dispatch is implemented. |
+| Implemented | new user | launch locally and request help | learn the accepted commands without leaving the terminal. |
+| Implemented | student | add and list coursework with deadlines and exact estimates | keep an identifiable record of unfinished work. |
+| Implemented | student with changed requirements | edit task details | correct my plan inputs without replacing task IDs. |
+| Implemented | student working across sessions | report completed minutes or a session percentage | keep the remaining estimate accurate. |
+| Implemented | student revising an estimate | replace remaining work without recording progress | account for newly discovered work. |
+| Implemented | student finishing an assignment | retain a completed task and view completed work | distinguish completion from permanent removal. |
+| Implemented | student correcting mistaken completion | reopen a task with an explicit estimate | return its remaining work to planning. |
+| Implemented | student | permanently delete unwanted tasks | remove work I no longer need to schedule. |
+| Implemented | student with weekly coursework | create a weekly task template | avoid re-entering each occurrence. |
+| Implemented | student with fixed classes or meetings | manage weekly, bounded and one-time commitments | prevent study sessions from overlapping busy time. |
+| Implemented | student whose class is cancelled | skip one commitment occurrence | release that date without deleting the series. |
+| Implemented | unexpectedly busy student | block one date through a one-time commitment | move study work into other available periods. |
+| Implemented | student with a regular routine | configure weekday hours and date overrides | plan within realistic study windows. |
+| Implemented | student needing rest | configure work limits and breaks | avoid excessive continuous study. |
+| Implemented | student balancing deadlines | generate a plan and view daily schedules | see when to work and which work does not fit. |
+| Implemented | returning student | restore records, settings and the exact saved plan | continue without re-entry or a changed schedule. |
+| Implemented | student encountering invalid input or a rejected save | receive an error without partial changes | correct and safely retry the request. |
+| Implemented | student unavailable across multiple dates | submit a continuous or daily unavailable range | block each affected date atomically without entering it separately. |
+
+The range story is supported by `CommandDispatcherTest`, `CommitmentServiceTest`
+and active UI-022 through UI-027. The verification sections identify the
+automated checks and their boundaries; publication and hosted CI need their own
+release evidence.
+<!-- @@author -->
 
 ## Appendix C: Non-Functional Requirements
 
-These are quality requirements and operating constraints for the candidate,
+These are quality requirements and operating constraints for this implementation,
 separate from functional commands and from claims that every platform has been
 tested. Verification entry points indicate how each requirement can be assessed.
 
@@ -1693,8 +1795,9 @@ terminal/provider behavior on another OS.
 
 ### Tasks and input validation
 
-Use Java 25 and a JAR built from the candidate source described in
-[Task design](#task-model-and-command-parsing), not v1.0. Launch
+<!-- @@author nickpatt -->
+Use Java 25 and a JAR built from this checkout, as described in
+[build and verification](#build-packaging-and-console-verification). Launch
 `java -ea -jar scheduleflow.jar` from an empty disposable folder. Choose `D`
 as tomorrow's local date and `E` as the following day, both `YYYY-MM-DD` and
 within the next year. Replace `D`/`E` before entering commands; they are not
@@ -1747,6 +1850,18 @@ of an already-completed task similarly preserves an existing plan. See
 [storage testing](#saving-restoration-failure-and-recovery) for failed-save/restart
 recipes and [Task syntax](UserGuide.md#tasks) for more fields. Exit before
 discarding only this disposable folder. Live timing is not a fixed-clock test.
+
+**Retained generated task after template deletion**
+
+In a fresh disposable store, add
+`task recur add n/Quiz due/D 1800 d/30 every/WEEKLY until/D`, then enter
+`task recur delete R1`. `task recur list` must be empty while `task list` still
+contains T1. Record `task progress T1 done/7`, complete T1, reopen it with
+`task reopen T1 remaining/45`, then rename it using `task edit T1 n/Independent quiz`.
+The same T1 must remain with 45 minutes; the template list stays empty. Restart
+and check both lists again. The fixed-time `TaskRecurrenceTest` additionally
+checks original release/provenance, priority, position, settings and counters.
+<!-- @@author -->
 
 ### Commitments and unavailable periods
 
@@ -1818,9 +1933,17 @@ In another empty folder, run
 Expect three dated records with the same 15:00–17:00 window and consecutive IDs.
 Delete C2 and confirm C1 and C3 remain independently available.
 
-For atomic rejection, first add a one-time commitment on 27 October from
-16:00–16:30, then attempt that daily batch. Expect an overlap error, no generated
-periods and an unchanged next ID; a following valid addition must receive C2.
+For atomic rejection, start another empty folder and enter:
+
+```text
+commitment add n/Existing on/2026-10-27 start/1600 d/30
+unavailable daily n/Appointment from/2026-10-26 until/2026-10-28 start/1500 end/1700
+commitment list
+commitment add n/Retry on/2026-10-27 start/1700 d/30
+```
+
+Expect C1, then `Error: Commitment overlaps C1: Existing`. The list must contain
+only C1, with no generated periods; the retry must receive C2.
 UI-024 supplies the exact reversed/equal range, overnight daily, alignment and
 syntax rejections. Deterministic dispatcher tests cover a failed save and
 insufficient ID capacity, which are not practical to force through an ordinary
@@ -1855,11 +1978,12 @@ weekday (for example `tuesday`); substitute them in the commands.
 
 A repeatable partial result can be checked in a fresh folder by adding
 `task add n/Large due/D 0000 d/2147483647`, then running `plan`. Expect
-unallocated work and unchanged stored minutes. For an exact complete/BREAK
+unallocated work and unchanged stored minutes. For a complete default-policy
 schedule, use the controlled-clock
-[User Guide example](UserGuide.md#worked-schedule-example) as a reference,
-or replay the saved-plan fixtures UI-029/UI-031; the production JAR has no
-clock-setting flag. Live tests cannot promise those same timestamps.
+[User Guide example](UserGuide.md#worked-schedule-example) as a reference. For
+reserved BREAK rows, replay saved-plan fixture UI-029; UI-031 covers frozen task
+sessions. The production JAR has no clock-setting flag, so live tests cannot
+promise those same timestamps.
 
 For a small exact partial-allocation check, use a second empty launch folder.
 Choose D0 as today and D1 as tomorrow, both within the next year. Replace
@@ -1884,7 +2008,7 @@ separate from other manual tests so its IDs and settings are isolated.
 
 ### Saving, restoration, failure and recovery
 
-Use Java 25 and the candidate `scheduleflow.jar` built from the source described
+Use Java 25 and `scheduleflow.jar` built from the source described
 in [persistence design](#persistence-and-the-snapshot-aggregate). Launch with
 `java -ea -jar scheduleflow.jar` in disposable folders. Keep one instance per
 folder. Never use your normal data for these checks; see the
@@ -1940,6 +2064,20 @@ commands; its 18:00 deadline must be within the allowed calendar-year range.
 3. Repeat with an extra `BROKEN` line appended to the restored plan file. Expect
    a saved-plan validation error before the prompt and unchanged invalid bytes.
    Restore the backup again. Exact wording depends on which plan row/count fails.
+   Also try an impossible-work fixture: replace B's `data/scheduleflow.txt`
+   with these UTF-8 rows, retaining the final newline:
+
+   ```text
+   SCHEDULEFLOW|6
+   NEXT|2|1|1
+   TASK2|1|2026-10-06T18:00|30|NORMAL|Draft
+   PLAN|2026-10-05T07:00|2027-10-05T00:00|1|0|0
+   SESSION|1|2026-10-05T08:00|2026-10-05T09:00|60
+   ```
+
+   Its real task ID and valid interval must still fail with
+   `Error: Invalid saved plan: Scheduled work plus remainder must equal source remaining work.`,
+   status 1, no prompt and unchanged bytes. Restore the backup afterward.
 4. For an access/type rejection, close the app, move B's data file aside and
    create a directory named `scheduleflow.txt` in its place. Launch. Expect
    `Error: Cannot load saved data: ...`, status 1 and no prompt. Remove only that
@@ -1965,5 +2103,6 @@ unsupported atomic move or failed temporary-file cleanup; those provider failure
 paths have deterministic injected JUnit coverage, separate from this manual
 recipe and from actual provider evidence. If cleanup itself fails, an abandoned
 temporary sibling can remain; preserve the main file and inspect the failure
-before discarding disposable test artifacts. Full impossible-plan rejection is
-still pending the planning validator and its storage integration.
+before discarding disposable test artifacts. Codec, filesystem-load and packaged
+startup regressions verify impossible-plan rejection through the integrated
+planning validator without changing the original saved file.

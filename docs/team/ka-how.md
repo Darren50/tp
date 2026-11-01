@@ -1,5 +1,17 @@
 # Koh Ka How - Project Portfolio Page
 
+<!-- @@author ka-how -->
+The final release review adds both implemented unavailable modes to command
+help and the User Guide reference, removes stale coming-soon text, and adds
+UI-035 plus production-entry-point and packaged tests for impossible saved
+work. The latter checks status 1, no prompt, quiet stderr and preserved bytes;
+valid frozen restart cases remain active. Storage feasibility rules and codec
+integration retain Gabriel's and Ernest's component ownership. The tracked
+guide PDFs are exported from the corrected Markdown with portable cross-guide
+links and visually reviewed storage diagrams. Verification commands and platform
+limits are in the [Developer Guide](../DeveloperGuide.md#build-packaging-and-console-verification).
+<!-- @@author -->
+
 ## Overview
 
 ScheduleFlow is a Java 25 command-line application that helps university students
@@ -8,6 +20,12 @@ plans in 30-minute slots, reports work that cannot fit, and saves tasks,
 commitments and generated plans for later sessions.
 
 ## Summary of Contributions
+
+PE preparation adds packaged scenario UI-036 for edits after commitment skips.
+It checks unchanged frozen schedules after rejected edits, retained versus
+discarded cancellations, plan invalidation, overlap errors and two saved restarts.
+The commitment implementation and service regressions belong to Darren under
+the team's whole-file authorship allocation.
 
 **Code contributed:** [Personal RepoSense code view][reposense] | [GitHub profile][github].
 I implemented the application entry point, console loop, session state,
@@ -115,8 +133,8 @@ tests do not claim actual broken-pipe or cross-platform evidence.
 [console-source]: ../../src/main/java/scheduleflow/cli/ConsoleUi.java
 [console-tests]: ../../src/test/java/scheduleflow/cli/ConsoleUiTest.java
 [main-tests]: ../../src/test/java/scheduleflow/MainTest.java
-[current-class-diagram]: ../images/ka-how-console-classes.svg
-[current-sequence-diagram]: ../images/ka-how-command-loop.svg
+[current-class-diagram]: ../images/diagrams/ka-how-console-classes.svg
+[current-sequence-diagram]: ../images/diagrams/ka-how-command-loop.svg
 [issue18]: https://github.com/AY2627S1-CS2113-T10-1/tp/issues/18
 [issue65]: https://github.com/AY2627S1-CS2113-T10-1/tp/issues/65
 [issue67]: https://github.com/AY2627S1-CS2113-T10-1/tp/issues/67

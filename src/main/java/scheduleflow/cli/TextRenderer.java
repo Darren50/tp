@@ -141,6 +141,10 @@ public final class TextRenderer {
                 "commitment list - List weekly and one-time commitments.",
                 "commitment delete CNUMBER - Delete a weekly or one-time commitment.",
                 "commitment skip CNUMBER on/YYYY-MM-DD - Skip one occurrence.",
+                "unavailable continuous n/NAME from/YYYY-MM-DD HHmm until/YYYY-MM-DD HHmm"
+                        + " - Block one continuous interval across dates.",
+                "unavailable daily n/NAME from/YYYY-MM-DD until/YYYY-MM-DD start/HHmm end/HHmm"
+                        + " - Block the same window on each date, inclusively.",
                 "hours DAY|YYYY-MM-DD /start HH:mm /end HH:mm - Set study hours.",
                 "hours DAY|YYYY-MM-DD - View effective study hours (full lowercase weekday).",
                 "hours reset DAY|YYYY-MM-DD - Restore inherited study hours.",

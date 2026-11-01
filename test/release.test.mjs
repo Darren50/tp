@@ -90,3 +90,30 @@ test('the normal distribution includes the release JAR and working assertion-ena
         await rm(directory, { recursive: true, force: true });
     }
 });
+
+test('the release JAR rejects impossible frozen work without changing saved bytes', async () => {
+    const temporaryRoot = path.resolve(tmpdir());
+    const directory = await mkdtemp(path.join(temporaryRoot, 'scheduleflow-corrupt-plan-'));
+    assert.ok(directory.startsWith(temporaryRoot + path.sep));
+    const file = path.join(directory, 'data/scheduleflow.txt');
+    const original = Buffer.from('SCHEDULEFLOW|6\nNEXT|2|1|1\n'
+        + 'TASK2|1|2026-10-06T18:00|30|NORMAL|Draft\n'
+        + 'PLAN|2026-10-05T07:00|2027-10-05T00:00|1|0|0\n'
+        + 'SESSION|1|2026-10-05T08:00|2026-10-05T09:00|60\n');
+    try {
+        await mkdir(path.dirname(file));
+        await writeFile(file, original);
+        await assert.rejects(execute(JAVA, ['-ea', '-jar', JAR_FILE], { cwd: directory, timeout: 10000 }), error => {
+            record(`CORRUPT PLAN stdout=${JSON.stringify(error.stdout)} stderr=${JSON.stringify(error.stderr)}`);
+            assert.equal(error.code, 1);
+            assert.equal(error.stdout.replaceAll('\r\n', '\n'),
+                'Error: Invalid saved plan: Scheduled work plus remainder must equal source remaining work.\n');
+            assert.equal(error.stderr, '');
+            return true;
+        });
+        assert.deepEqual(await readFile(file), original);
+        record('RESULT impossible frozen work rejected before prompt; original bytes preserved');
+    } finally {
+        await rm(directory, { recursive: true, force: true });
+    }
+});

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -303,12 +304,63 @@ class CommitmentServiceTest {
         assertThrows(ValidationException.class, () -> service.skip(skipped, 1, monday.plusWeeks(1)));
         assertThrows(ValidationException.class, () -> service.skip(source, 1, monday.plusDays(1)));
         assertThrows(ValidationException.class, () -> service.skip(source, 2, monday));
-        assertThrows(ValidationException.class,
-                () -> service.edit(skipped, 1, null, DayOfWeek.TUESDAY, null, null));
         assertEquals("state", assertThrows(NullPointerException.class,
                 () -> service.skip(null, 1, monday)).getMessage());
         assertEquals("date", assertThrows(NullPointerException.class,
                 () -> service.skip(source, 1, null)).getMessage());
+    }
+
+    @Test
+    void edit_skippedSeriesChangesWeekday_removesInapplicableSkipsAndKeepsIdentity() {
+        LocalDate monday = LocalDate.of(2026, 11, 2);
+        Snapshot source = service.add(Snapshot.empty(), "Lecture", DayOfWeek.MONDAY,
+                LocalTime.of(10, 0), 60, monday, monday.plusWeeks(4));
+        Snapshot skipped = service.skip(source, 1, monday.plusWeeks(1));
+
+        Snapshot candidate = service.edit(skipped, 1, null, DayOfWeek.TUESDAY, null, null);
+        Commitment edited = candidate.commitments().getFirst();
+        assertEquals(1, edited.id());
+        assertEquals(DayOfWeek.TUESDAY, edited.day());
+        assertTrue(edited.skippedDates().isEmpty());
+        assertTrue(edited.occursOn(monday.plusDays(1)));
+        assertFalse(edited.occursOn(monday));
+        assertEquals(skipped.nextCommitmentId(), candidate.nextCommitmentId());
+        assertEquals(Set.of(monday.plusWeeks(1)), skipped.commitments().getFirst().skippedDates());
+    }
+
+    @Test
+    void edit_skippedSeriesNarrowsRange_keepsOnlyApplicableSkipsAcrossRestart(@TempDir Path directory)
+            throws StorageException {
+        LocalDate monday = LocalDate.of(2026, 11, 2);
+        Snapshot source = service.add(Snapshot.empty(), "Lecture", DayOfWeek.MONDAY,
+                LocalTime.of(10, 0), 60, monday, monday.plusWeeks(4));
+        Snapshot firstSkip = service.skip(source, 1, monday.plusWeeks(1));
+        Snapshot skipped = service.skip(firstSkip, 1, monday.plusWeeks(3));
+        Snapshot candidate = service.edit(skipped, 1, null, null, null, null,
+                monday.plusWeeks(2), monday.plusWeeks(4));
+        Commitment edited = candidate.commitments().getFirst();
+        assertEquals(Set.of(monday.plusWeeks(3)), edited.skippedDates());
+        assertTrue(edited.occursOn(monday.plusWeeks(2)));
+        assertFalse(edited.occursOn(monday.plusWeeks(3)));
+        assertEquals(2, skipped.commitments().getFirst().skippedDates().size());
+        Path file = directory.resolve("scheduleflow.txt");
+        new FileStorage(file, new StateCodec()).save(candidate);
+        assertEquals(candidate, new FileStorage(file, new StateCodec()).load());
+    }
+
+    @Test
+    void edit_skippedSeriesMovesIntoConflict_rejectsWithoutLosingOriginalSkips() {
+        LocalDate monday = LocalDate.of(2026, 11, 2);
+        Snapshot source = service.add(Snapshot.empty(), "Lecture", DayOfWeek.MONDAY,
+                LocalTime.of(10, 0), 60);
+        Snapshot skipped = service.skip(source, 1, monday);
+        Snapshot withOther = service.add(skipped, "Tutorial", DayOfWeek.TUESDAY, LocalTime.of(10, 0), 60);
+
+        assertRejected("Commitment overlaps C2: Tutorial",
+                () -> service.edit(withOther, 1, null, DayOfWeek.TUESDAY, null, null));
+        assertEquals(Set.of(monday), withOther.commitments().getFirst().skippedDates());
+        assertEquals(DayOfWeek.MONDAY, withOther.commitments().getFirst().day());
+        assertEquals(3, withOther.nextCommitmentId());
     }
 
     @Test

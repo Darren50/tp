@@ -9,7 +9,7 @@ import { parseArgs } from 'node:util';
 const { values } = parseArgs({ options: {
   plantuml: { type: 'string' },
   chrome: { type: 'string' },
-  output: { type: 'string', default: 'docs/images' },
+  output: { type: 'string', default: 'docs/images/diagrams' },
 } });
 if (!values.plantuml) {
   throw new Error('Usage: node tools/render-uml.mjs --plantuml PATH [--chrome PATH] [--output DIR]');

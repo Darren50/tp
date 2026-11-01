@@ -26,12 +26,17 @@ I implemented the deadline-aware planner and daily schedule projection, then ext
 
 For issue [#48](https://github.com/AY2627S1-CS2113-T10-1/tp/issues/48), I added fixed-time planner and projection tests for blocking study time with an ordinary one-time commitment. The tests and UI acceptance notes cover replanning around the block, loss of deadline capacity and the effects of deleting or restoring the commitment. See [PR #82](https://github.com/AY2627S1-CS2113-T10-1/tp/pull/82) and the [unavailable-period test plan](../../test/ui-test-plan.md).
 
-I also documented a proposed contract for multi-date unavailable commands. That console workflow remains explicitly planned rather than fully wired; see the [Developer Guide handoff](../DeveloperGuide.md#multi-date-unavailable-periods-implementation-handoff-planned).
+<!-- @@author GabrielYuSP -->
+I also documented the proposed multi-date unavailable contract. Darren's later
+dispatcher integration now makes both modes available; see the
+[implemented transaction](../DeveloperGuide.md#multi-date-unavailable-periods).
+My planning contribution remains distinct from his command execution work.
+<!-- @@author -->
 
 ### Documentation
 
 - **User Guide:** Added explanations of saved plans, partial allocations, exact task work versus reserved slot capacity, recurrence release timing, and how to investigate insufficient study time. See [study plans](../UserGuide.md#study-plans), [unallocated work](../UserGuide.md#unallocated-work), [weekly recurring tasks](../UserGuide.md#weekly-recurring-tasks) and the related [troubleshooting guidance](../UserGuide.md#what-if-my-work-does-not-fit-before-its-deadline).
-- **Developer Guide:** Documented planning and schedule-projection boundaries, the deadline-constrained allocation example, fixed-time and manual verification, and planning terminology. Added class and sequence diagrams for the planning workflow. See [planning design](../DeveloperGuide.md#planning-schedule-projection-and-recurrence), the [allocation trace](../DeveloperGuide.md#deadline-constrained-allocation-trace), [planning tests](../DeveloperGuide.md#fixed-time-planning-and-recurrence-verification) and the [glossary](../DeveloperGuide.md#appendix-d-glossary). These guide updates are in [PR #102](https://github.com/AY2627S1-CS2113-T10-1/tp/pull/102).
+- **Developer Guide:** Documented planning and schedule-projection boundaries, the deadline-constrained allocation example, fixed-time and manual verification, and planning terminology. Added class and sequence diagrams for the planning workflow. See [planning design and allocation example](../DeveloperGuide.md#planning-schedule-projection-and-recurrence), [planning tests](../DeveloperGuide.md#fixed-time-planning-and-recurrence-verification) and the [glossary](../DeveloperGuide.md#appendix-d-glossary). These guide updates are in [PR #102](https://github.com/AY2627S1-CS2113-T10-1/tp/pull/102).
 
 ### Team-based contributions
 

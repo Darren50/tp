@@ -38,6 +38,9 @@ class Snapshot <<record>> VALUES {
     - recurringTasks: List<RecurringTask>
 }
 class Plan <<record>> VALUES
+interface Planner <<interface>> DOMAIN {
+    {static} + validate(plan: Plan) : void
+}
 
 Storage <|.. FileStorage
 FileStorage --> "codec\n1" StateCodec
@@ -48,6 +51,7 @@ PlanCodec --> "snapshots\n1" StateCodec
 StateCodec ..> PlanCodec : decodes plan sources
 StateCodec ..> Snapshot : creates
 PlanCodec ..> Plan : creates / reads
+PlanCodec ..> Planner : validates before encode / after decode
 FileStorage ..> StorageException : throws
 Plan --> "source\n1" Snapshot
 

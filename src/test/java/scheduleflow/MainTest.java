@@ -166,6 +166,24 @@ class MainTest {
     }
 
     @Test
+    void main_impossibleSavedAllocation_exitsBeforePromptAndPreservesBytes() throws Exception {
+        Path data = directory.resolve("data/scheduleflow.txt");
+        Files.createDirectories(data.getParent());
+        byte[] original = ("SCHEDULEFLOW|6\nNEXT|2|1|1\nTASK2|1|2026-10-06T18:00|30|NORMAL|Draft\n"
+                + "PLAN|2026-10-05T07:00|2027-10-05T00:00|1|0|0\n"
+                + "SESSION|1|2026-10-05T08:00|2026-10-05T09:00|60\n").getBytes(StandardCharsets.UTF_8);
+        Files.write(data, original);
+
+        ProcessResult result = launch("exit\n", List.of(), List.of("-ea"));
+
+        assertEquals(1, result.status());
+        assertEquals("Error: Invalid saved plan: Scheduled work plus remainder must equal source remaining work.\n",
+                result.output());
+        assertEquals("", result.error());
+        assertArrayEquals(original, Files.readAllBytes(data));
+    }
+
+    @Test
     void main_corruptSavedPlan_exitsBeforePromptAndPreservesBytes() throws Exception {
         Path data = directory.resolve("data/scheduleflow.txt");
         Files.createDirectories(data.getParent());

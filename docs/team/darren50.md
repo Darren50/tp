@@ -31,6 +31,13 @@ My main contribution was the commitment feature: the `Commitment` model and `Com
 
 ### Testing
 
+During PE preparation, I fixed commitment edits after skipped occurrences.
+Weekday and date-range changes now discard only cancellations that no longer
+belong to the resulting series, while retaining applicable skips and checking
+real overlaps. Regression tests cover weekday changes, shortened bounds,
+conflict rollback and saved reloads; the User and Developer Guides explain the
+calendar-specific cancellation rule. Ownership follows my existing whole-file tags.
+
 I wrote most of [`CommitmentServiceTest`][service-tests] and [`CommitmentTest`][model-tests], which cover validation boundaries, overlap and adjacency, date bounds, skips, one-time rules, conflict ordering, counter exhaustion, candidate immutability and range expansion. `CommandDispatcherTest` additionally verifies whole-batch prepare/save/publish ordering, save-failure retry, plan and ID preservation, unrelated snapshot data, later-segment rollback and insufficient ID capacity. I also added fixed-date integration tests showing that recorded task and commitment durations survive saving and partial allocation ([PR #30][pr30]), and packaged console scenarios for commitment edits and unavailable ranges across restarts.
 
 ### Documentation
@@ -68,8 +75,8 @@ I wrote most of [`CommitmentServiceTest`][service-tests] and [`CommitmentTest`][
 [ug-planned]: ../UserGuide.md#blocking-multiple-dates-planned
 [dg-design]: ../DeveloperGuide.md#commitments-and-command-execution
 [dg-implementation]: ../DeveloperGuide.md#dated-commitments-and-save-before-publication-dispatch
-[dg-design-considerations]: ../DeveloperGuide.md#design-considerations-1
+[dg-design-considerations]: ../DeveloperGuide.md#commitment-design-considerations
 [dg-verification]: ../DeveloperGuide.md#commitmentdispatch-transaction-verification
 [dg-manual]: ../DeveloperGuide.md#commitments-and-unavailable-periods
-[class-diagram]: ../images/darren-commitment-dispatch-classes.svg
-[sequence-diagram]: ../images/darren-commitment-edit.svg
+[class-diagram]: ../images/diagrams/darren-commitment-dispatch-classes.svg
+[sequence-diagram]: ../images/diagrams/darren-commitment-edit.svg

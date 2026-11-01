@@ -1,30 +1,38 @@
+<!-- @@author nickpatt -->
 # ScheduleFlow
 
 ScheduleFlow is a Java 25 command-line application for university students who
-want to manage coursework tasks, recurring weekly commitments, and study plans.
+want to manage coursework tasks, fixed commitments, and study plans.
 
 It allocates available study time in 30-minute slots according to task deadlines,
-reports work that cannot fit before its deadline, and saves successful task and
-commitment changes automatically.
+reports work that cannot fit before its deadline, and saves successful changes
+automatically. Task work remains exact even when its reserved capacity is rounded
+up to a whole slot.
 
 ## Current implementation
 
 The following features are implemented:
 
 - Add, edit, list, and delete coursework tasks, preserving stable IDs.
+- Record minute/session progress, revise estimates, retain completed tasks and
+  reopen them with an explicit estimate.
 - Add, list, and stop weekly task templates with saved occurrence-generation history.
-- Add, list, and delete recurring weekly commitments.
+- Add, edit, skip, list, and delete weekly/bounded commitments, and manage one-time
+  commitments and continuous/daily unavailable periods.
+- Configure weekday study hours, date overrides and optional work/break settings.
 - Generate an earliest-deadline-first study plan.
 - View today's schedule or a schedule for a specific date.
 - Report unallocated work and the reason it could not be scheduled.
-- Persist tasks, commitments, and ID counters in `data/scheduleflow.txt`.
+- Persist tasks, commitments, templates, settings, ID counters and frozen plans
+  in `data/scheduleflow.txt`.
 - Restore saved data when the application starts.
 - Preserve state when validation or saving fails.
 - Run with UTF-8 console input and output.
 - Package the application as an executable Shadow JAR.
 
-Plans are temporary: they are cleared after a successful task or commitment
-mutation and are not saved between application runs.
+Plans and their source data survive restarts without moving sessions. Successful
+source changes clear the saved plan; rejected commands and recognized no-ops
+preserve it. Run `plan` again after a change to schedule the revised work.
 
 ## User documentation
 
@@ -74,27 +82,19 @@ data/scheduleflow.txt
 
 ## Supported commands
 
-```text
-help
-task add n/NAME due/YYYY-MM-DD HHmm d/MINUTES
-task list
-task delete TNUMBER
-task edit TNUMBER [n/NAME] [due/YYYY-MM-DD HHmm]
-task recur add n/NAME due/YYYY-MM-DD HHmm d/MINUTES every/WEEKLY [until/YYYY-MM-DD]
-task recur list
-task recur delete RNUMBER
-task remaining TNUMBER remaining/MINUTES
-commitment add n/NAME day/DAY start/HHmm d/MINUTES
-commitment list
-commitment delete CNUMBER
-plan
-schedule today
-schedule YYYY-MM-DD
-exit
-```
+Use `help` for syntax, `task` commands for coursework and weekly templates,
+`commitment` commands for fixed events, and `unavailable continuous` or
+`unavailable daily` for multiple dates. Use `hours` and `policy` to configure
+availability and rest, `plan` to generate a saved plan, `schedule` to view it,
+and `exit` to close the application. See the
+[complete command summary](UserGuide.md#command-summary) for exact field order,
+examples and restrictions.
 
-Tasks and commitments use positive durations divisible by 30 minutes.
-Study hours are 08:00–22:00 every day, including weekends.
+Ordinary task estimates, progress and reopening use exact whole minutes;
+creation/reopening require positive values. Commitments and weekly template
+estimates require positive multiples of 30. Study hours default to 08:00–22:00
+every day; weekday and date-specific overrides can change them. Work/break
+limits apply when a policy is configured. Allocation slots remain 30 minutes.
 
 ## Testing
 
@@ -143,3 +143,4 @@ them only after persistence succeeds.
 
 For repository conventions and contribution instructions, see
 [AGENTS.md](../AGENTS.md).
+<!-- @@author -->

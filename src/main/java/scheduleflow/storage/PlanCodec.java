@@ -11,6 +11,7 @@ import scheduleflow.common.ValidationException;
 import scheduleflow.model.Snapshot;
 import scheduleflow.model.Task;
 import scheduleflow.planning.Plan;
+import scheduleflow.planning.Planner;
 import scheduleflow.planning.ScheduleEntry;
 import scheduleflow.planning.SlotKind;
 import scheduleflow.planning.StudySession;
@@ -41,9 +42,15 @@ final class PlanCodec {
      *
      * @param plan validated frozen plan
      * @return version 6 or 8 text with LF endings and a final newline
+     * @throws StorageException if the frozen allocation is infeasible or its work does not balance
      */
-    String encode(Plan plan) {
+    String encode(Plan plan) throws StorageException {
         Objects.requireNonNull(plan, "plan");
+        try {
+            Planner.validate(plan);
+        } catch (ValidationException exception) {
+            throw new StorageException("Invalid saved plan: " + exception.getMessage(), exception);
+        }
         String source = snapshots.encodeForPlan(plan.source());
         String header = plan.source().studyPolicy().isPresent() ? POLICY_PLAN_HEADER : PLAN_HEADER;
         StringBuilder text = new StringBuilder(header).append(source.substring(source.indexOf('\n')));
@@ -133,7 +140,9 @@ final class PlanCodec {
             LocalDateTime generatedAt = LocalDateTime.parse(metadata[1]);
             LocalDateTime horizonEnd = LocalDateTime.parse(metadata[2]);
             validateReferences(source, generatedAt, horizonEnd, sessionRows, remainderRows, breakRows);
-            return new Plan(generatedAt, horizonEnd, source, sessionRows, remainderRows, breakRows);
+            Plan plan = new Plan(generatedAt, horizonEnd, source, sessionRows, remainderRows, breakRows);
+            Planner.validate(plan);
+            return plan;
         } catch (IllegalArgumentException | DateTimeException | ValidationException exception) {
             throw new StorageException("Invalid saved plan: " + exception.getMessage(), exception);
         }
