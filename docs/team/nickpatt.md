@@ -76,12 +76,12 @@ Given below are my contributions to the project.
 [progress-commit]: https://github.com/AY2627S1-CS2113-T10-1/tp/commit/bfba4b1d6918b30d2fb608d964c357894d48341b
 [queries-commit]: https://github.com/AY2627S1-CS2113-T10-1/tp/commit/207f2df373d1ceaea19dd75ab82ca9839b9c82aa
 [reposense]: https://nus-cs2113-ay2627-s1.github.io/tp-dashboard/?search=nickpatt&breakdown=true
-[parser]: ../../src/main/java/scheduleflow/cli/CommandParser.java
-[rules]: ../../src/main/java/scheduleflow/common/InputRules.java
+[parser]: https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/main/java/scheduleflow/cli/CommandParser.java
+[rules]: https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/main/java/scheduleflow/common/InputRules.java
 [audit-commit]: https://github.com/AY2627S1-CS2113-T10-1/tp/commit/d6d1ea74eb8bedd6d7a0b6076419331bca739f27
-[service-tests]: ../../src/test/java/scheduleflow/task/TaskServiceTest.java
-[recurrence-tests]: ../../src/test/java/scheduleflow/task/TaskRecurrenceTest.java
-[parser-tests]: ../../src/test/java/scheduleflow/cli/CommandParserTest.java
+[service-tests]: https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/task/TaskServiceTest.java
+[recurrence-tests]: https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/task/TaskRecurrenceTest.java
+[parser-tests]: https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/cli/CommandParserTest.java
 [ug-tasks]: ../UserGuide.md#tasks
 [ug-progress]: ../UserGuide.md#recording-progress
 [ug-completion]: ../UserGuide.md#completing-and-viewing-completed-tasks

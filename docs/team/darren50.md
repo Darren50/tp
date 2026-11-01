@@ -101,9 +101,9 @@ Given below are my contributions to the project.
 [pr86]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/86
 [pr126]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/126
 [reposense]: https://nus-cs2113-ay2627-s1.github.io/tp-dashboard/?search=Darren50&breakdown=true
-[service-tests]: ../../src/test/java/scheduleflow/commitment/CommitmentServiceTest.java
-[model-tests]: ../../src/test/java/scheduleflow/model/CommitmentTest.java
-[dispatcher-tests]: ../../src/test/java/scheduleflow/cli/CommandDispatcherTest.java
+[service-tests]: https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/commitment/CommitmentServiceTest.java
+[model-tests]: https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/model/CommitmentTest.java
+[dispatcher-tests]: https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/cli/CommandDispatcherTest.java
 [pr30]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/30
 [ug-commitments]: ../UserGuide.md#commitments
 [ug-unavailable]: ../UserGuide.md#marking-a-study-period-unavailable

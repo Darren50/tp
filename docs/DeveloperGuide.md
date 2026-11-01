@@ -1,5 +1,6 @@
 ---
 title: ScheduleFlow Developer Guide
+layout: page
 description: Design, implementation, verification and manual testing of the ScheduleFlow Java 25 console application.
 ---
 
@@ -51,8 +52,8 @@ ScheduleFlow uses [Gradle](https://gradle.org/) and the
 [Shadow plugin](https://gradleup.com/shadow/) to build and package its executable
 JAR, [JUnit 5](https://junit.org/junit5/) for Java tests, and
 [Checkstyle](https://checkstyle.org/) for automated style checks. Dependency
-versions are recorded in [`build.gradle`](../build.gradle) and the
-[Gradle wrapper configuration](../gradle/wrapper/gradle-wrapper.properties).
+versions are recorded in [`build.gradle`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/build.gradle) and the
+[Gradle wrapper configuration](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/gradle/wrapper/gradle-wrapper.properties).
 These are development tools; ScheduleFlow does not call their websites while
 managing a student's data.
 
@@ -129,8 +130,8 @@ The class views below expand these components.
 The whole-file `@@author` tags and the agreed version 2 allocation define
 ownership, including nested types and helpers. Cross-component calls do not
 split ownership. Tags record the allocation, not historical authorship. See
-[source ownership](../src/main/java/scheduleflow/AGENTS.md),
-[test ownership](../src/test/AGENTS.md) and the
+[source ownership](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/main/java/scheduleflow/AGENTS.md),
+[test ownership](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/AGENTS.md) and the
 [RepoSense tag reference](https://reposense.org/RepoSense/ug/usingAuthorTags.html).
 
 ### Console application and presentation
@@ -148,7 +149,7 @@ dependencies are omitted to keep this view focused.
 
 [PlantUML source](diagrams/ka-how-console-classes.puml) · [PNG](images/diagrams/ka-how-console-classes.png)
 
-[`Main`](../src/main/java/scheduleflow/Main.java) supplies UTF-8 streams,
+[`Main`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/main/java/scheduleflow/Main.java) supplies UTF-8 streams,
 `Clock.systemDefaultZone()` and `FileStorage` for `data/scheduleflow.txt` relative
 to the launch folder. It creates `App` and turns its returned status into process
 termination. `App` receives `Storage`, `Clock` and `ConsoleUi`, then constructs
@@ -156,20 +157,20 @@ the parser, renderer and dispatcher with their services. Constructors do no I/O;
 loading begins in `run()`. `AppState` is local to that run, rather than an `App`
 field, so command execution receives the session's live state explicitly.
 
-[`ConsoleUi`](../src/main/java/scheduleflow/cli/ConsoleUi.java) owns line reads,
+[`ConsoleUi`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/main/java/scheduleflow/cli/ConsoleUi.java) owns line reads,
 prompt/response writes and flushing. Its retained reader/writer are shown in
 Figure 2. `flushOutput()` uses `PrintWriter.checkError()` to flush and detect
 suppressed write failures, exposing them as `UncheckedIOException`. `App` catches
 that exception only around console writes and returns status 1; unrelated
 component failures still propagate. No public signatures change.
-[`TextRenderer`](../src/main/java/scheduleflow/cli/TextRenderer.java) returns
+[`TextRenderer`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/main/java/scheduleflow/cli/TextRenderer.java) returns
 formatted text; it does not read the clock, perform console I/O or mutate state.
-[`AppState`](../src/main/java/scheduleflow/cli/AppState.java) retains a `Snapshot`
+[`AppState`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/main/java/scheduleflow/cli/AppState.java) retains a `Snapshot`
 and an optional matching `Plan`. `commit(saved)` publishes a saved candidate and
 clears the plan. `replacePlan(plan)` accepts an equal source snapshot, rejecting
 a stale source before changing state, even with assertions disabled.
 
-[`Command`](../src/main/java/scheduleflow/cli/Command.java) is a sealed interface
+[`Command`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/main/java/scheduleflow/cli/Command.java) is a sealed interface
 whose nested records carry requests, for example `Help`, `AddTask` and
 `ScheduleToday`. These values have no execution method: syntax belongs to
 Nickhil's parser and domain rules to the services. `CommandResponse(output,
@@ -194,17 +195,17 @@ who originally wrote every parser or integration method.
 [PlantUML source](diagrams/nickhil-task-parser-classes.puml) · [PNG](images/diagrams/nickhil-task-parser-classes.png)
 
 The two groups have different responsibilities. The stateless
-[`CommandParser`](../src/main/java/scheduleflow/cli/CommandParser.java) matches
+[`CommandParser`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/main/java/scheduleflow/cli/CommandParser.java) matches
 the entire input and constructs Ka How's nested `Command` records. It does not
 look up IDs, read a clock, save data or invoke a service. `ParseException`
 preserves a message and the recognized command's usage hint. This applies to
 all command families, not just tasks. Both unavailable range transports have
 separate dispatcher/service acceptance; parser tests establish syntax only.
 
-[`TaskService`](../src/main/java/scheduleflow/task/TaskService.java) reads
+[`TaskService`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/main/java/scheduleflow/task/TaskService.java) reads
 Ernest's immutable `Snapshot` and returns a validated candidate or the identical
 source for a no-op. It never owns live application state.
-[`Task`](../src/main/java/scheduleflow/model/Task.java) is a record containing a
+[`Task`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/main/java/scheduleflow/model/Task.java) is a record containing a
 stable ID, normalized name, optional deadline, exact remaining minutes,
 `TaskPriority`, and optional external `TaskOccurrence` provenance. Zero remaining
 means retained completion. `TaskEdit` distinguishes omitted replacements from
@@ -240,9 +241,9 @@ class view readable; the linked service source supplies complete signatures.
 
 | Type | Responsibility |
 | --- | --- |
-| [`Commitment`](../src/main/java/scheduleflow/model/Commitment.java) | Immutable record of one fixed commitment. Its compact constructor validates the name, half-hour start, positive 30-minute-multiple duration, same-day end, date range and skipped dates. `recursOn(date)` checks the underlying series, `occursOn(date)` also excludes skipped dates, and `overlaps(other)` checks actual shared occurrences. |
-| [`CommitmentService`](../src/main/java/scheduleflow/commitment/CommitmentService.java) | Stateless operations (`add`, `addContinuousBlock`, `addDailyBlocks`, `edit`, `skip`, `delete`, `list`) that take a `Snapshot` and return a complete candidate `Snapshot` or an ordered view. It never saves, publishes or reads the clock. |
-| [`CommandDispatcher`](../src/main/java/scheduleflow/cli/CommandDispatcher.java) | Routes each nested `Command` record to one handler, captures the command time once, and owns the save-before-publication transaction for every mutating command, not only commitments. |
+| [`Commitment`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/main/java/scheduleflow/model/Commitment.java) | Immutable record of one fixed commitment. Its compact constructor validates the name, half-hour start, positive 30-minute-multiple duration, same-day end, date range and skipped dates. `recursOn(date)` checks the underlying series, `occursOn(date)` also excludes skipped dates, and `overlaps(other)` checks actual shared occurrences. |
+| [`CommitmentService`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/main/java/scheduleflow/commitment/CommitmentService.java) | Stateless operations (`add`, `addContinuousBlock`, `addDailyBlocks`, `edit`, `skip`, `delete`, `list`) that take a `Snapshot` and return a complete candidate `Snapshot` or an ordered view. It never saves, publishes or reads the clock. |
+| [`CommandDispatcher`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/main/java/scheduleflow/cli/CommandDispatcher.java) | Routes each nested `Command` record to one handler, captures the command time once, and owns the save-before-publication transaction for every mutating command, not only commitments. |
 
 A `Commitment` takes one of three shapes, all stored in the same record:
 
@@ -374,12 +375,12 @@ filesystem access, text conversion and aggregate validation:
 
 | Type | Responsibility |
 | --- | --- |
-| [`Storage`](../src/main/java/scheduleflow/storage/Storage.java) | Defines complete snapshot and frozen-plan loading/saving contracts for the application. |
-| [`FileStorage`](../src/main/java/scheduleflow/storage/FileStorage.java) | Resolves one target path, reads UTF-8 and replaces that file atomically. Construction performs no I/O. |
+| [`Storage`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/main/java/scheduleflow/storage/Storage.java) | Defines complete snapshot and frozen-plan loading/saving contracts for the application. |
+| [`FileStorage`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/main/java/scheduleflow/storage/FileStorage.java) | Resolves one target path, reads UTF-8 and replaces that file atomically. Construction performs no I/O. |
 | `FileStorage.FileOperations` | Package-private save-operation seam; normal instances delegate to `Files`, while storage tests inject faults without global filesystem changes. |
-| [`StateCodec`](../src/main/java/scheduleflow/storage/StateCodec.java) | Converts versioned source records without opening files. |
-| [`PlanCodec`](../src/main/java/scheduleflow/storage/PlanCodec.java) | Converts a frozen result together with its complete source; it is package-private. |
-| [`Snapshot`](../src/main/java/scheduleflow/model/Snapshot.java) | Copies lists and validates the complete persisted aggregate. |
+| [`StateCodec`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/main/java/scheduleflow/storage/StateCodec.java) | Converts versioned source records without opening files. |
+| [`PlanCodec`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/main/java/scheduleflow/storage/PlanCodec.java) | Converts a frozen result together with its complete source; it is package-private. |
+| [`Snapshot`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/main/java/scheduleflow/model/Snapshot.java) | Copies lists and validates the complete persisted aggregate. |
 | `StorageException` | Reports rejected loads/saves while retaining underlying causes where available. |
 
 ![Persistence classes and their external model dependencies](images/diagrams/ernest-storage-classes.svg)
@@ -436,7 +437,7 @@ repeating them. A typical mutating command follows these stages:
 A mistyped command should leave the student able to correct it in the same
 session. The shell implements this by distinguishing recoverable command
 failures from failures that prevent the session from continuing. Its starting
-points are [`App.run()` and `runCommands()`](../src/main/java/scheduleflow/cli/App.java).
+points are [`App.run()` and `runCommands()`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/main/java/scheduleflow/cli/App.java).
 
 #### Startup and the command loop
 
@@ -1000,7 +1001,7 @@ the original commitments, counters, plan and disk unchanged, so a retry receives
 the same first C ID. Individual generated commitments remain ordinary one-time
 records and can be edited or deleted by their C ID.
 
-UI-022 through UI-027 in the [active fixture](../test/ui-scenarios.json) cover
+UI-022 through UI-027 in the [active fixture](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/test/ui-scenarios.json) cover
 continuous and daily output, restart, independent deletion, invalid syntax and
 values, later-segment rollback, exclusive midnight, adjacency and leap day.
 Focused dispatcher tests use controlled storage to establish one-save ordering,
@@ -1285,8 +1286,17 @@ changing application versions; older executables may reject newer layouts.
 
 ## Documentation, logging, testing and dev-ops
 
-Review both guides with each implementation, following [AGENTS.md](../AGENTS.md).
+Review both guides with each implementation, following [AGENTS.md](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/AGENTS.md).
 Use isolated saved data and fixed clocks where exact dates matter.
+
+GitHub Pages publishes the `docs/` folder. The User Guide, Developer Guide and
+About Us use `_layouts/page.html`, which renders `_includes/navigation.html`
+above the page content without the theme's repository-name heading. The homepage
+uses the same include. Shared header styles live in `assets/css/navigation.css`;
+`assets/css/home.css` styles only the homepage. Use absolute GitHub links for
+source, tests and other files outside `docs/`. Check navigation at desktop and
+mobile widths, and refresh both guide PDFs after documentation changes, checking
+their links, diagrams and page layouts.
 
 ### Build, packaging and console verification
 
@@ -1311,14 +1321,14 @@ distributions use the same Shadow JAR; test dependencies are not shipped.
 For focused shell checks, run `test --tests scheduleflow.MainTest --tests
 scheduleflow.cli.AppTest --tests scheduleflow.cli.AppStateTest --tests
 scheduleflow.cli.ConsoleUiTest --tests scheduleflow.cli.TextRendererTest` with
-the wrapper. The [UI plan](../test/ui-test-plan.md) explains isolated data,
+the wrapper. The [UI plan](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/test/ui-test-plan.md) explains isolated data,
 per-command comparisons and scenario readiness. The UI runner rebuilds the
 current JAR and tests without assertions; `release.test.mjs` replays maintained
 cases with `-ea` and extracts/launches the normal distribution ZIP. It checks
 both scripts' assertion defaults but executes only the current OS's script.
 Preserve the printed `build/ui-transcripts/` paths before running `clean`.
 
-The [CI workflow](../.github/workflows/gradle.yml) retains its Ubuntu, macOS and
+The [CI workflow](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/.github/workflows/gradle.yml) retains its Ubuntu, macOS and
 Windows matrix and Java 25 setup. It installs Node 22, prints the Java, wrapper
 and Node versions, then runs `build`, runner self-tests, active UI cases and
 the release replay in that order. The wrapper is selected for each runner OS;
@@ -1426,7 +1436,7 @@ so that titles cannot change export names. The Windows PlantUML distribution
 used here supplies Graphviz; other installations may require it separately.
 
 PlantUML draws structural note arrows directly. Its sequence notes have no
-connector, so [`tools/render-uml.mjs`](../tools/render-uml.mjs) adds dotted arrows
+connector, so [`tools/render-uml.mjs`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/tools/render-uml.mjs) adds dotted arrows
 to their named participants' active invocation bars (or lifelines), then derives
 the PNG from the same SVG. Sequence notes must use `note right of PARTICIPANT`;
 the exporter checks their count, text and targets and reserves a visible gap for
@@ -1455,7 +1465,7 @@ Run the owned tests with Java 25 from the repository root:
 ./gradlew test --tests 'scheduleflow.task.TaskServiceTest' --tests 'scheduleflow.task.TaskEditTest' --tests 'scheduleflow.task.TaskRecurrenceTest' --tests 'scheduleflow.model.TaskTest' --tests 'scheduleflow.common.*' --tests 'scheduleflow.cli.CommandParserTest'
 ```
 
-[`TaskServiceTest`](../src/test/java/scheduleflow/task/TaskServiceTest.java)
+[`TaskServiceTest`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/task/TaskServiceTest.java)
 checks 0/50/100% credit, floor rounding, large products, no-op identity,
 completion/reopening, and captured-time deadline boundaries. TaskRecurrenceTest
 checks generated-task metadata preservation, including the complete lifecycle
@@ -1464,7 +1474,7 @@ not replace Gabriel's generation tests. TaskEditTest and InputRulesTest cover tr
 normalization. CommandParserTest covers all families' grammar and usage hints,
 not command execution. Explicit rejection tests keep domain-only optional-deadline,
 deadline-clearing and priority APIs outside the console grammar. Tests use explicit times, temporary data,
-and restored logger/locale settings; see [test conventions](../src/test/AGENTS.md).
+and restored logger/locale settings; see [test conventions](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/AGENTS.md).
 Link documentation claims to those tests rather than adding tests for prose.
 
 Opt-in `FINE` diagnostics on `scheduleflow.task`, `scheduleflow.model.Task`,
@@ -1472,7 +1482,7 @@ Opt-in `FINE` diagnostics on `scheduleflow.task`, `scheduleflow.model.Task`,
 names/command values. Use the existing [file-handler configuration](#build-packaging-and-console-verification);
 these classes install no handlers. Public validation works without `-ea`;
 assertions check internal invariants. Lifecycle methods do not all emit stage
-logs. [JUnit/documentation standards](../AGENTS.md) remain the authority for
+logs. [JUnit/documentation standards](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/AGENTS.md) remain the authority for
 Javadoc, isolation and verification; builds alone are not manual acceptance.
 <!-- @@author -->
 
@@ -1484,9 +1494,9 @@ storage. None uses the real time or the developer's data:
 
 | Test class | Tests | What it establishes |
 | --- | --- | --- |
-| [`CommitmentTest`](../src/test/java/scheduleflow/model/CommitmentTest.java) | 13 | Record validation boundaries, `occursOn`/`recursOn`, adjacency versus overlap, shared-occurrence checks for bounded and skipped series. |
-| [`CommitmentServiceTest`](../src/test/java/scheduleflow/commitment/CommitmentServiceTest.java) | 55 | Each operation returns a candidate and leaves its source unchanged; conflict messages and ordering; edits keep position, ID and study hours; skip/one-time rules, including weekday/range edits after skips; counter exhaustion; unavailable-range expansion. |
-| [`CommandDispatcherTest`](../src/test/java/scheduleflow/cli/CommandDispatcherTest.java) | 46 | Every route and a single clock read per command; save-before-publication for each mutation and unavailable batch; failed saves preserving state, plan, counters and retry IDs; no-op and read-only commands making no save; the one-`savePlan` planning transaction. |
+| [`CommitmentTest`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/model/CommitmentTest.java) | 13 | Record validation boundaries, `occursOn`/`recursOn`, adjacency versus overlap, shared-occurrence checks for bounded and skipped series. |
+| [`CommitmentServiceTest`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/commitment/CommitmentServiceTest.java) | 55 | Each operation returns a candidate and leaves its source unchanged; conflict messages and ordering; edits keep position, ID and study hours; skip/one-time rules, including weekday/range edits after skips; counter exhaustion; unavailable-range expansion. |
+| [`CommandDispatcherTest`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/cli/CommandDispatcherTest.java) | 46 | Every route and a single clock read per command; save-before-publication for each mutation and unavailable batch; failed saves preserving state, plan, counters and retry IDs; no-op and read-only commands making no save; the one-`savePlan` planning transaction. |
 
 The dispatcher tests use an in-memory `FakeStorage` that records attempts and can
 fail on demand. For example, `execute_eachFailedSave_preservesStatePlanCountersAndRetryId`
@@ -1526,13 +1536,13 @@ clock and cannot establish those exact-time allocation assertions.
 
 ### Storage diagnostics and compatibility verification
 
-[`StateCodecTest`](../src/test/java/scheduleflow/storage/StateCodecTest.java) checks
+[`StateCodecTest`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/storage/StateCodecTest.java) checks
 legacy/current formats, pipes/Unicode, exact work, bounds/skips, hours, policy and
-recurrence relationships. [`PlanCodecTest`](../src/test/java/scheduleflow/storage/PlanCodecTest.java)
+recurrence relationships. [`PlanCodecTest`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/storage/PlanCodecTest.java)
 checks complete frozen results, malformed rows and distinct legacy layouts.
-[`SnapshotTest`](../src/test/java/scheduleflow/model/SnapshotTest.java) covers
+[`SnapshotTest`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/model/SnapshotTest.java) covers
 immutable copies, counters, overlaps and policy-preserving candidates;
-[`FileStorageTest`](../src/test/java/scheduleflow/storage/FileStorageTest.java)
+[`FileStorageTest`](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/storage/FileStorageTest.java)
 uses temporary folders for byte-preserving reads, restarts, blocked parents,
 failed replacement and cleanup. Controlled `FileOperations` faults additionally
 exercise temporary creation failure, a partially written temporary file,
@@ -1546,7 +1556,7 @@ temporary folder. No ordinary-move fallback is attempted. Dispatcher/App tests e
 publication and matching-source restoration with fixed clocks and controlled
 storage. Their fake failures do not simulate every filesystem provider.
 
-UI-031/UI-032 in the [console test plan](../test/ui-test-plan.md) cover restored
+UI-031/UI-032 in the [console test plan](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/test/ui-test-plan.md) cover restored
 plans and invalidation. The [manual recipes](#saving-restoration-failure-and-recovery)
 add backup/transfer and an interactive rejected-save check. These new faults are
 injected at real transaction boundaries, not evidence of unsupported moves or
@@ -1721,7 +1731,7 @@ retain any evidence you need, then discard the disposable folder.
 
 These are representative manual paths, not an exhaustive input matrix.
 The [User Guide command summary](UserGuide.md#command-summary) gives the full
-syntax and the [UI fixtures](../test/ui-scenarios.json) supply exact outputs
+syntax and the [UI fixtures](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/test/ui-scenarios.json) supply exact outputs
 for additional reproducible cases.
 
 Every supported console command has one primary group below. Saving is

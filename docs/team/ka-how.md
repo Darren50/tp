@@ -130,10 +130,10 @@ Given below are my contributions to the project.
 [issue96]: https://github.com/AY2627S1-CS2113-T10-1/tp/issues/96
 [issue97]: https://github.com/AY2627S1-CS2113-T10-1/tp/issues/97
 [issue98]: https://github.com/AY2627S1-CS2113-T10-1/tp/issues/98
-[app-tests]: ../../src/test/java/scheduleflow/cli/AppTest.java
-[renderer-tests]: ../../src/test/java/scheduleflow/cli/TextRendererTest.java
-[main-tests]: ../../src/test/java/scheduleflow/MainTest.java
-[ui-plan]: ../../test/ui-test-plan.md
+[app-tests]: https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/cli/AppTest.java
+[renderer-tests]: https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/cli/TextRendererTest.java
+[main-tests]: https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/MainTest.java
+[ui-plan]: https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/test/ui-test-plan.md
 [ug-format]: ../UserGuide.md#command-format
 [ug-commitments]: ../UserGuide.md#listing-commitments
 [ug-labels]: ../UserGuide.md#schedule-labels

@@ -86,13 +86,13 @@ Given below are my contributions to the project.
 [schedule-commit]: https://github.com/AY2627S1-CS2113-T10-1/tp/commit/dd5910c
 [pr81]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/81
 [reposense]: https://nus-cs2113-ay2627-s1.github.io/tp-dashboard/?search=GabrielYuSP&breakdown=true
-[planner]: ../../src/main/java/scheduleflow/planning/Planner.java
+[planner]: https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/main/java/scheduleflow/planning/Planner.java
 [pr127]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/127
 [pr82]: https://github.com/AY2627S1-CS2113-T10-1/tp/pull/82
 [issue48]: https://github.com/AY2627S1-CS2113-T10-1/tp/issues/48
-[ui-plan]: ../../test/ui-test-plan.md
-[planner-tests]: ../../src/test/java/scheduleflow/planning/EarliestDeadlinePlannerTest.java
-[validation-tests]: ../../src/test/java/scheduleflow/planning/PlannerTest.java
+[ui-plan]: https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/test/ui-test-plan.md
+[planner-tests]: https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/planning/EarliestDeadlinePlannerTest.java
+[validation-tests]: https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/src/test/java/scheduleflow/planning/PlannerTest.java
 [ug-plans]: ../UserGuide.md#study-plans
 [ug-unallocated]: ../UserGuide.md#unallocated-work
 [ug-recurring]: ../UserGuide.md#weekly-recurring-tasks
