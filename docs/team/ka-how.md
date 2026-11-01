@@ -90,7 +90,7 @@ Given below are my contributions to the project.
   - Exported both guides as PDFs and checked their content, links and rendered
     layouts for portable offline documentation ([PR #119][pr119]).
 
-- **Community:**
+- **Team-based tasks:**
   - Reviewed frozen-plan invariants and regression coverage for overlap, timing,
     task references and accounting ([PR #127 review][review127]). Commented on
     recurrence coverage across components and saved restarts

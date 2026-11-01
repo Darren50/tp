@@ -84,7 +84,7 @@ Given below are my contributions to the project.
     with PlantUML sources and rendered SVGs. Explained the one-time-event
     representation in the [design considerations][dg-design-considerations].
 
-- **Community:**
+- **Team-based tasks:**
   - Reviewed and approved text rendering ([PR #22][pr22]), task operations
     ([PR #25][pr25]) and console/dispatch integration ([PR #29][pr29]).
 
