@@ -6,17 +6,10 @@ description: Turn coursework deadlines and fixed commitments into a study plan y
 
 <!-- @@author ernestgoh-god -->
 <link rel="stylesheet" href="assets/css/home.css">
+<link rel="stylesheet" href="{{ '/assets/css/navigation.css' | relative_url }}">
 
 <div class="sf-home">
-  <header class="sf-header">
-    <a class="sf-brand" href="./" aria-label="ScheduleFlow home">ScheduleFlow</a>
-    <nav aria-label="Project navigation">
-      <a href="UserGuide.html">User Guide</a>
-      <a href="DeveloperGuide.html">Developer Guide</a>
-      <a href="AboutUs.html">About Us</a>
-      <a href="https://github.com/AY2627S1-CS2113-T10-1/tp">GitHub</a>
-    </nav>
-  </header>
+  {% include navigation.html %}
 
   <main>
     <h1>ScheduleFlow</h1>

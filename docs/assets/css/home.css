@@ -24,29 +24,6 @@ body:has(.sf-home) {
   outline: 3px solid #805700;
   outline-offset: 4px;
 }
-.sf-header {
-  align-items: center;
-  border-bottom: 1px solid #e5e5e5;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px 24px;
-  justify-content: space-between;
-  padding: 12px 0;
-}
-.sf-home .sf-brand {
-  color: #202020;
-  font-size: 24px;
-  font-weight: 300;
-}
-.sf-header nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 18px;
-}
-.sf-header nav a {
-  color: #202020;
-  font-size: 14px;
-}
 .sf-home h1 {
   border: 0;
   font-size: clamp(32px, 5vw, 42px);
@@ -76,14 +53,5 @@ body:has(.sf-home) {
   font-weight: 700;
   margin: 20px 0 12px;
   padding: 0;
-}
-@media (max-width: 640px) {
-  .sf-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-  .sf-header nav {
-    gap: 8px 16px;
-  }
 }
 /* @@author */

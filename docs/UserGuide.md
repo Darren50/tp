@@ -1,5 +1,6 @@
 ---
 title: ScheduleFlow User Guide
+layout: page
 description: Manage tasks, recurring and one-time commitments, and study plans with the ScheduleFlow command line application.
 ---
 

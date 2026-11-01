@@ -1,3 +1,9 @@
+---
+title: About us
+layout: page
+description: Meet the ScheduleFlow team and read each member's project portfolio.
+---
+
 # About us
 
 | Display | Name | GitHub Profile | Portfolio |

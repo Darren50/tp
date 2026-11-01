@@ -1,5 +1,6 @@
 ---
 title: ScheduleFlow Developer Guide
+layout: page
 description: Design, implementation, verification and manual testing of the ScheduleFlow Java 25 console application.
 ---
 
@@ -1287,6 +1288,15 @@ changing application versions; older executables may reject newer layouts.
 
 Review both guides with each implementation, following [AGENTS.md](https://github.com/AY2627S1-CS2113-T10-1/tp/blob/master/AGENTS.md).
 Use isolated saved data and fixed clocks where exact dates matter.
+
+GitHub Pages publishes the `docs/` folder. The User Guide, Developer Guide and
+About Us use `_layouts/page.html`, which renders `_includes/navigation.html`
+above the page content without the theme's repository-name heading. The homepage
+uses the same include. Shared header styles live in `assets/css/navigation.css`;
+`assets/css/home.css` styles only the homepage. Use absolute GitHub links for
+source, tests and other files outside `docs/`. Check navigation at desktop and
+mobile widths, and refresh both guide PDFs after documentation changes, checking
+their links, diagrams and page layouts.
 
 ### Build, packaging and console verification
 
