@@ -2,6 +2,20 @@
   "version": 1,
   "cases": [
     {
+      "id": "UI-035",
+      "aim": "Reject a structurally valid frozen plan with impossible credited work before prompting",
+      "status": "active",
+      "setup": "Real task ID and valid interval, but 60 credited minutes exceed the 30-minute source task",
+      "files": {
+        "data/scheduleflow.txt": "SCHEDULEFLOW|6\nNEXT|2|1|1\nTASK2|1|2026-10-06T18:00|30|NORMAL|Draft\nPLAN|2026-10-05T07:00|2027-10-05T00:00|1|0|0\nSESSION|1|2026-10-05T08:00|2026-10-05T09:00|60\n"
+      },
+      "sessions": [{
+        "startup": "Error: Invalid saved plan: Scheduled work plus remainder must equal source remaining work.\n",
+        "exitCode": 1,
+        "steps": []
+      }]
+    },
+    {
       "id": "UI-034",
       "aim": "Reopen completed tasks, retain plans on rejection and persist restored work across restarts",
       "status": "active",

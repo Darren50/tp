@@ -29,6 +29,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.Isolated;
 import scheduleflow.commitment.CommitmentService;
+import scheduleflow.common.ValidationException;
 import scheduleflow.model.Commitment;
 import scheduleflow.model.RecurringTask;
 import scheduleflow.model.Snapshot;
@@ -48,6 +49,49 @@ import scheduleflow.task.TaskService;
 class FileStorageTest {
     @TempDir
     private Path directory;
+
+    @Test
+    void load_impossibleFrozenAllocation_rejectsBothReadsAndPreservesBytes() throws Exception {
+        Path file = directory.resolve("scheduleflow.txt");
+        String impossible = "SCHEDULEFLOW|6\nNEXT|2|1|1\nTASK2|1|2026-10-06T18:00|30|NORMAL|Draft\n"
+                + "PLAN|2026-10-05T07:00|2027-10-05T00:00|1|0|0\n"
+                + "SESSION|1|2026-10-05T08:00|2026-10-05T09:00|60\n";
+        Files.writeString(file, impossible);
+        byte[] bytes = Files.readAllBytes(file);
+        FileStorage storage = new FileStorage(file, new StateCodec());
+        Snapshot source = new Snapshot(List.of(new Task(1, "Draft",
+                LocalDateTime.of(2026, 10, 6, 18, 0), 30)), List.of(), 2, 1);
+
+        assertTrue(assertThrows(StorageException.class, storage::load).getCause() instanceof ValidationException);
+        assertTrue(assertThrows(StorageException.class, () -> storage.loadPlan(source)).getCause()
+                instanceof ValidationException);
+        assertArrayEquals(bytes, Files.readAllBytes(file));
+        assertOnlyTargetRemains(file);
+    }
+
+    @Test
+    void savePlan_impossibleAllocation_rejectsBeforeFilesystemChanges() throws Exception {
+        LocalDateTime now = LocalDateTime.of(2026, 10, 5, 7, 0);
+        Snapshot source = new Snapshot(List.of(new Task(1, "Draft", now.plusDays(1), 30)), List.of(), 2, 1);
+        Plan impossible = new Plan(now, TimeRules.horizonEnd(now), source, List.of(), List.of());
+        Path file = directory.resolve("missing/scheduleflow.txt");
+        FaultyFileOperations operations = new FaultyFileOperations(FailureStage.CREATE);
+        FileStorage storage = new FileStorage(file, new StateCodec(), operations);
+
+        assertTrue(assertThrows(StorageException.class, () -> storage.savePlan(impossible)).getCause()
+                instanceof ValidationException);
+        assertFalse(Files.exists(file.getParent()));
+        assertEquals(List.of(), operations.stages);
+
+        Path existing = directory.resolve("scheduleflow.txt");
+        FileStorage previous = new FileStorage(existing, new StateCodec());
+        Plan valid = new EarliestDeadlinePlanner().generate(source, now);
+        previous.savePlan(valid);
+        byte[] bytes = Files.readAllBytes(existing);
+        assertThrows(StorageException.class, () -> previous.savePlan(impossible));
+        assertArrayEquals(bytes, Files.readAllBytes(existing));
+        assertEquals(Optional.of(valid), previous.loadPlan(source));
+    }
 
     @Test
     void save_partialTemporaryWrite_preservesTargetAndCleansSibling() throws Exception {

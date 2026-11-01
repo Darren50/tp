@@ -11,7 +11,11 @@ Study hours default to **08:00–22:00 every day**, including weekends. You can 
 
 > **Guide scope:** This guide describes the current development build for the upcoming v2.0 release. Earlier published JARs may have fewer commands. Successful changes save automatically, and IDs and generated plans survive restarts.
 
-> **Coming soon:** [Blocking multiple dates](#blocking-multiple-dates-planned) is planned and cannot currently be used from the console. Use [one-time commitments](#adding-a-one-time-commitment) to block individual dates.
+<!-- @@author ka-how -->
+Use [blocking multiple dates](#blocking-multiple-dates) to reserve a continuous
+interval or the same daily window across several dates. Use
+[one-time commitments](#adding-a-one-time-commitment) for one date.
+<!-- @@author -->
 
 ## Contents
 
@@ -38,7 +42,7 @@ Study hours default to **08:00–22:00 every day**, including weekends. You can 
 - [Study plans](#study-plans)
   - [Generating a plan](#generating-a-plan)
   - [Marking a study period unavailable](#marking-a-study-period-unavailable)
-  - [Blocking multiple dates (Coming soon)](#blocking-multiple-dates-planned)
+  - [Blocking multiple dates](#blocking-multiple-dates)
   - [Session limits and breaks](#session-limits-and-breaks)
   - [Planning hours and date range](#planning-hours-and-date-range)
   - [Unallocated work](#unallocated-work)
@@ -1129,6 +1133,14 @@ It preserves the invalid/unreadable file rather than silently starting empty
 or accepting part of it. Valid overdue tasks still load; a new plan reports
 their remaining work as `deadline passed`.
 
+<!-- @@author ernestgoh-god -->
+A saved plan must also fit its saved availability, deadlines and remaining work.
+An impossible plan is rejected as a whole; the app preserves the file instead of
+silently dropping its schedule. Restore a known-good backup before restarting.
+These checks use the saved planning time, so an old but valid frozen plan can
+still be viewed without moving its sessions.
+<!-- @@author -->
+
 **Backup or transfer:** close the app, then copy `data/scheduleflow.txt` to a safe
 location. To transfer, put a copy in the destination launch folder's `data`
 subfolder, backing up any existing destination file first, and launch a compatible
@@ -1224,6 +1236,7 @@ task names and saved contents; broader application errors can contain paths or
 other details, so inspect any logs before sharing them. Logging does not repair
 the file. Normal launches stay quiet.
 
+<!-- @@author ka-how -->
 ## Command summary
 
 These are the supported console commands in this build. Follow an action link for its rules and examples. See [command format](#command-format) for optional fields, alternatives, dates, times and IDs.
@@ -1250,6 +1263,8 @@ These are the supported console commands in this build. Follow an action link fo
 | [Skip one commitment occurrence](#skipping-one-occurrence) | `commitment skip CNUMBER on/YYYY-MM-DD` |
 | [List commitments](#listing-commitments) | `commitment list` |
 | [Delete a commitment](#deleting-a-commitment) | `commitment delete CNUMBER` |
+| [Block a continuous interval](#blocking-multiple-dates) | `unavailable continuous n/NAME from/YYYY-MM-DD HHmm until/YYYY-MM-DD HHmm` |
+| [Block a daily window across dates](#blocking-multiple-dates) | `unavailable daily n/NAME from/YYYY-MM-DD until/YYYY-MM-DD start/HHmm end/HHmm` |
 | [Set study hours](#study-hours) | `hours DAY\|YYYY-MM-DD /start HH:mm /end HH:mm` |
 | [View effective study hours](#study-hours) | `hours DAY\|YYYY-MM-DD` |
 | [Reset study hours](#study-hours) | `hours reset DAY\|YYYY-MM-DD` |
@@ -1264,6 +1279,7 @@ These are the supported console commands in this build. Follow an action link fo
 `TNUMBER`, `CNUMBER` and `RNUMBER` mean existing IDs such as `T1`, `C1` and `R1`.
 For `DAY`, use uppercase three-letter codes such as `MON` for commitments and full lowercase names such as `monday` for study hours. `WEEKLY` is a literal keyword. `PERCENT` is a whole number from `0` to `100`, representing the completed percentage of the stated session. Replace other placeholders with your values.
 
-For commitment edits, supply at least one field; choose `day/` or `on/` if changing when it occurs. `on/` cannot be combined with `from/` or `until/`. The [Coming soon multi-date commands](#blocking-multiple-dates-planned) are excluded from this supported-command list.
+For commitment edits, supply at least one field; choose `day/` or `on/` if changing when it occurs. `on/` cannot be combined with `from/` or `until/`. Unavailable commands validate and save every affected date together; see [blocking multiple dates](#blocking-multiple-dates).
 
 [Back to top](#scheduleflow-user-guide)
+<!-- @@author -->

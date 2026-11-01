@@ -18,26 +18,19 @@ moves, permission denial, other operating systems and power-loss durability need
 their own evidence. Existing directory-target tests provide a separate real
 filesystem replacement failure; dispatcher fake-storage tests cover publication.
 
-## Pending prerequisite and storage integration
+## Completed storage integration
 
-Gabriel's tested `Planner.validate(Plan)` boundary is absent from the baseline.
-Do not replace it with storage-owned interval/accounting rules. After that API
-lands, Ernest must:
-
-1. Validate decoded plans before returning them from `PlanCodec.decode`, retaining
-   validation causes in `StorageException`. `StateCodec.decode` delegates plan
-   files through this path and must reject the whole file too.
-2. Validate before encoding/saving plans, before directories or temporary files
-   are created. Preserve formats 1-5/7, 6/8 and the distinct legacy-5 plan layout.
-3. Add impossible-interval/accounting regressions for codec, `load` and `loadPlan`,
-   byte preservation and startup rejection. Correct only genuinely impossible
-   synthetic fixtures, preserving their scenarios and original owners' tags.
-4. Update the guides/PPP and both storage diagrams for the actual validation
-   calls, then repeat the full Java, UI and release checks.
-
-This P0 work is not complete, and existing structural/reference checks do not
-establish full allocation feasibility. No merge/cherry-pick or substitute
-validator is included in the independent work.
+<!-- @@author ernestgoh-god -->
+The final release fixes connect Gabriel's tested Planner.validate(Plan) boundary
+to PlanCodec before encoding and after decoding, preserving StorageException
+causes. StateCodec plan decoding follows the same path. Tests reject excessive,
+missing and duplicate work, overlap, deadline and cutoff violations; valid
+alternative allocations and supported formats remain frozen on read.
+FileStorage regressions preserve invalid input bytes in both read paths and
+reject invalid saves before creating directories or replacing a previous plan.
+Storage diagram sources and SVG/PNG renders now show this dependency. The API,
+file versions, single-writer model and atomic replacement requirement remain.
+<!-- @@author -->
 
 ## Packaged corrupt-plan example for Ka How
 
@@ -53,17 +46,22 @@ SESSION|1|2026-10-05T08:00|2026-10-05T09:00|60
 ```
 
 The task ID, row counts, horizon and interval are structurally valid, but the
-session credits 60 minutes against a 30-minute source task. The baseline accepts
-this file; it must **not** be labelled a passing rejection case yet.
+session credits 60 minutes against a 30-minute source task. After integration,
+UI-035 and the packaged release regression require exit 1, no prompt, quiet
+stderr and this exact error:
 
-After validation integration, the contract is exit status 1, one startup error
-line, no `scheduleflow> ` prompt, empty stderr and byte-for-byte preserved input.
-The proposed translation is `Error: Invalid saved plan: MESSAGE` followed by a
-newline; `MESSAGE` must be taken from the verified validator implementation before
-Ka How adds an exact packaged expectation. The exact message remains pending,
-not an invented fixture. Keep a valid frozen restart case alongside it.
+```text
+Error: Invalid saved plan: Scheduled work plus remainder must equal source remaining work.
+```
 
-## Other-owner documentation handoff
+MainTest and the packaged release test verify byte preservation; UI-031/UI-032
+retain valid frozen restarts. Final evidence is in the task/parser release review.
+This is local Windows evidence, not hosted CI or power-loss certification.
+
+## Historical other-owner documentation handoff
+
+These were the original independent-seam requests. The completed integration
+and final report above supersede their pending statuses.
 
 The following owner updates remain pending; this note supplies wording/evidence
 without editing their assigned blocks or sending messages on their behalf.
@@ -83,7 +81,11 @@ without editing their assigned blocks or sending messages on their behalf.
   allocation rule. Supply the tested validator API/exception contract for the
   pending integration.
 
-## Documentation and attribution review
+## Historical independent-seam review
+
+The following review and 2026-10-31 evidence describe the original independent
+increment before validator integration. Superseding integration results and
+current artifact evidence are in [the final release review](nickpatt-release-review.md).
 
 - Updated Ernest's DG persistence design, atomic-save implementation, storage
   verification, NFR-3 evidence and manual-recovery limits; updated the UG saving

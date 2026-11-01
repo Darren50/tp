@@ -161,7 +161,8 @@ whose nested records carry requests, for example `Help`, `AddTask` and
 Nickhil's parser and domain rules to the services. `CommandResponse(output,
 shouldExit)` carries the dispatcher's formatted result and termination decision
 back to `App`. The diagram shows only representative records; the two unavailable
-range transports exist but their console routes remain unfinished.
+range transports execute atomic batch additions; active UI-022 through UI-027
+cover their confirmations, rejection and restarts.
 
 ### Task model and command parsing
 
@@ -273,8 +274,10 @@ cutoff rounding, clipping, midnight commitments and allowed schedule dates.
 `Planner.validate(Plan)` is the pure cross-record boundary. It checks the frozen
 source and generation time, not the current clock, without regenerating work.
 `EarliestDeadlinePlanner.generate` calls it before returning every result.
-Storage integration is assigned to Ernest and remains pending until his codecs
-call this boundary; raw `Plan` construction retains its lightweight contract.
+<!-- @@author GabrielYuSP -->
+Ernest's codecs call this boundary before encoding and after decoding frozen
+plans; raw `Plan` construction retains its lightweight contract.
+<!-- @@author -->
 
 `Planner` is implemented by `EarliestDeadlinePlanner`. `TimeRules` defines
 cutoff and horizon calculations. `StudyHours`/`StudyWindow` supply daily
@@ -382,14 +385,16 @@ order and are immutable; deleting all records does not reset counters.
 
 A `Snapshot` is source data. A `Plan` additionally freezes generation time,
 sessions, unallocated work and breaks against that source. Ka How's `AppState`
-holds the session's live snapshot and optional plan; storage neither publishes
-that state nor invokes the planner.
+holds the session's live snapshot and optional plan; storage does not publish
+that state or regenerate schedules.
 
-Full cross-record frozen-plan validation is a pending release dependency:
-Gabriel's tested `Planner.validate(Plan)` API is now available after integration,
-but the codecs do not yet invoke it. They retain their existing structural/reference checks;
-they do not yet reject every impossible allocation. No substitute allocation
-validator is implemented in storage.
+<!-- @@author ernestgoh-god -->
+`PlanCodec` calls Gabriel's pure `Planner.validate(Plan)` boundary before
+encoding and after decoding. Allocation rules remain in planning: infeasible
+intervals, overlaps, incorrect remainders and unbalanced work reject the complete
+plan with `StorageException` retaining the validation cause. Valid alternative
+frozen allocations remain unchanged; validation never reads today's clock.
+<!-- @@author -->
 
 ## Implementation
 
@@ -473,9 +478,8 @@ while the service and dispatcher establish candidate validation and rollback.
 | Output failure during a prompt, response, goodbye or error report | `ConsoleUi` detects the writer's error flag. `App` stops without reading another command or reporting the error to the failed writer. | Status 1; any already-saved command stays saved. |
 
 Unexpected programming exceptions propagate. In particular, a null dependency
-or a stale plan is not converted to an ordinary input error. (The unfinished
-range routes deliberately throw `ValidationException`, so they are reported as
-ordinary errors.) Extra process arguments are rejected by `Main` before loading,
+or a stale plan is not converted to an ordinary input error. Invalid range
+requests use domain validation; valid batches save once before publication. Extra process arguments are rejected by `Main` before loading,
 with `Error: Usage: java -jar scheduleflow.jar (no arguments)` and status 1.
 `App` returns status codes so tests and embedded callers need not terminate
 their JVM; only `Main` calls `System.exit`.
@@ -1143,7 +1147,8 @@ its original sessions and generation time; reading it does not credit progress.
 Both save operations use `FileStorage.writeAtomically`:
 
 1. `save(snapshot)` calls `StateCodec.encode`; `savePlan(plan)` calls
-   `PlanCodec.encode`, which asks `StateCodec.encodeForPlan` for the full source.
+   `PlanCodec.encode`, which validates the allocation with `Planner.validate`
+   before asking `StateCodec.encodeForPlan` for the full source.
    Encoding completes before any filesystem preparation. Null arguments are
    rejected before filesystem changes.
 2. Create missing parent directories and a distinct sibling temporary file.
@@ -1192,12 +1197,16 @@ UTF-8 and invalid records are failures. A broken symbolic link must not silently
 become an empty store. Loading itself creates no directories and rewrites no
 legacy data.
 
+<!-- @@author ernestgoh-god -->
 `StateCodec.decode` validates headers/records and constructs domain values and
 the complete `Snapshot`. Saved overdue tasks are valid: restoration does not
 repeat the time-dependent admission rule for adding a new task. For a plan file,
 decoding also checks metadata, counted rows, task references, matching remainder
-names/deadlines, interval bounds and result ordering. It does not rerun the
-allocator or prove every possible allocation relationship independently.
+names/deadlines, interval bounds and result ordering. `Planner.validate` then
+checks feasibility and work conservation against the frozen source/time. Encoding
+uses the same boundary before any directory or temporary file is created.
+Neither path reruns the allocator or materializes occurrences.
+<!-- @@author -->
 
 `App.run()` loads the snapshot and calls `loadPlan(source)` before the first
 prompt. `loadPlan` rereads the file and accepts only an equal embedded source;
@@ -1481,9 +1490,15 @@ add backup/transfer and an interactive rejected-save check. These new faults are
 injected at real transaction boundaries, not evidence of unsupported moves or
 cleanup denial on an actual provider. Other operating systems, real permission
 denial, unsupported providers and power-loss behavior still need separate
-evidence; the implementation makes no power-loss guarantee. Impossible-allocation
-load/save regressions remain pending Gabriel's planning validator; passing the
-existing codec checks does not close that release requirement.
+evidence; the implementation makes no power-loss guarantee.
+
+<!-- @@author ernestgoh-god -->
+`PlanCodecTest` rejects duplicate/missing/excess work, overlapping sessions,
+post-deadline work and pre-cutoff sessions, retaining validation causes through
+`StateCodec.decode`. Valid non-greedy plans and legacy/current formats round-trip.
+`FileStorageTest` verifies both load paths preserve impossible input bytes and
+invalid plans fail before filesystem changes or replacement of a valid plan.
+<!-- @@author -->
 
 #### Storage defensive checks and diagnostics
 
@@ -1972,6 +1987,11 @@ commands; its 18:00 deadline must be within the allowed calendar-year range.
 3. Repeat with an extra `BROKEN` line appended to the restored plan file. Expect
    a saved-plan validation error before the prompt and unchanged invalid bytes.
    Restore the backup again. Exact wording depends on which plan row/count fails.
+   Also try the complete impossible-work fixture in the
+   [storage handoff](release/ernest-storage-handoff.md#packaged-corrupt-plan-example-for-ka-how).
+   Its real task ID and valid interval must still fail with
+   `Error: Invalid saved plan: Scheduled work plus remainder must equal source remaining work.`,
+   status 1, no prompt and unchanged bytes. Restore the backup afterward.
 4. For an access/type rejection, close the app, move B's data file aside and
    create a directory named `scheduleflow.txt` in its place. Launch. Expect
    `Error: Cannot load saved data: ...`, status 1 and no prompt. Remove only that
@@ -1997,5 +2017,6 @@ unsupported atomic move or failed temporary-file cleanup; those provider failure
 paths have deterministic injected JUnit coverage, separate from this manual
 recipe and from actual provider evidence. If cleanup itself fails, an abandoned
 temporary sibling can remain; preserve the main file and inspect the failure
-before discarding disposable test artifacts. Full impossible-plan rejection is
-still pending the planning validator and its storage integration.
+before discarding disposable test artifacts. Codec, filesystem-load and packaged
+startup regressions verify impossible-plan rejection through the integrated
+planning validator without changing the original saved file.

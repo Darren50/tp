@@ -4,6 +4,7 @@
 participant "dispatcher:CommandDispatcher" as Dispatcher DOMAIN
 participant "storage:FileStorage" as Storage PERSISTENCE
 participant "codec:StateCodec" as Snapshots PERSISTENCE
+participant "Planner" as Planner <<interface>> DOMAIN
 participant "operations:FileStorage.FileOperations" as Operations PERSISTENCE
 participant "Files" as Files <<class>> PERSISTENCE
 
@@ -21,6 +22,8 @@ create participant "plans:PlanCodec" as Plans PERSISTENCE
 Storage -> Plans ++ : PlanCodec(codec)
 Plans --> Storage -- : plans
 Storage -> Plans ++ : encode(plan)
+Plans -> Planner ++ : validate(plan)
+Planner --> Plans -- : return
 Plans -> Snapshots ++ : encodeForPlan(plan.source())
 Snapshots --> Plans -- : complete source text
 Plans --> Storage -- : source and frozen-result text

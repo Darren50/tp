@@ -290,12 +290,19 @@ class TextRendererTest {
                         + " [from/YYYY-MM-DD until/YYYY-MM-DD]",
                 "commitment add n/NAME on/YYYY-MM-DD start/HHmm d/MINUTES", "commitment list",
                 "commitment delete CNUMBER", "commitment skip CNUMBER on/YYYY-MM-DD",
+                "unavailable continuous n/NAME from/YYYY-MM-DD HHmm until/YYYY-MM-DD HHmm",
+                "unavailable daily n/NAME from/YYYY-MM-DD until/YYYY-MM-DD start/HHmm end/HHmm",
                 "hours DAY|YYYY-MM-DD /start HH:mm /end HH:mm",
                 "hours DAY|YYYY-MM-DD", "hours reset DAY|YYYY-MM-DD",
                 "commitment edit CNUMBER [n/NAME] [day/DAY|on/YYYY-MM-DD] [start/HHmm] [d/MINUTES]"
                         + " [from/YYYY-MM-DD until/YYYY-MM-DD]", "plan",
                 "schedule today OR schedule YYYY-MM-DD", "exit");
         List<String> lines = output.lines().skip(1).toList();
+        assertEquals(List.of("unavailable continuous n/NAME from/YYYY-MM-DD HHmm until/YYYY-MM-DD HHmm"
+                        + " - Block one continuous interval across dates.",
+                "unavailable daily n/NAME from/YYYY-MM-DD until/YYYY-MM-DD start/HHmm end/HHmm"
+                        + " - Block the same window on each date, inclusively."),
+                lines.stream().filter(line -> line.startsWith("unavailable ")).toList());
         assertEquals(formats.size(), lines.size());
         for (int i = 0; i < formats.size(); i++) {
             assertTrue(lines.get(i).startsWith(formats.get(i) + " - "));

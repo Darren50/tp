@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
+import scheduleflow.common.ValidationException;
 import scheduleflow.model.Commitment;
 import scheduleflow.model.RecurringTask;
 import scheduleflow.model.Snapshot;
@@ -72,7 +73,7 @@ class PlanCodecTest {
     }
 
     @Test
-    void decode_missingExtraAndInvalidPlanRows_rejectsWholeFile() {
+    void decode_missingExtraAndInvalidPlanRows_rejectsWholeFile() throws StorageException {
         Plan empty = new Plan(NOW, TimeRules.horizonEnd(NOW), Snapshot.empty(), List.of(), List.of());
         String valid = plans.encode(empty);
         for (String invalid : List.of(valid.replace("PLAN|", "UNKNOWN|"),
@@ -85,6 +86,41 @@ class PlanCodecTest {
         String unknownSession = valid.replace("|0|0|0\n", "|1|0|0\n")
                 + "SESSION|1|2026-10-05T08:00|2026-10-05T08:30|30\n";
         assertThrows(StorageException.class, () -> plans.decode(unknownSession));
+    }
+
+    @Test
+    void encodeAndDecode_impossibleAllocation_rejectsWithValidationCause() throws StorageException {
+        Task task = new Task(1, "Draft", NOW.withHour(10), 45);
+        Snapshot source = new Snapshot(List.of(task), List.of(), 2, 1);
+        Plan partial = new Plan(NOW, TimeRules.horizonEnd(NOW), source,
+                List.of(new StudySession(1, NOW.withHour(8), NOW.withHour(8).withMinute(30), 15)),
+                List.of(new UnallocatedWork(1, task.name(), task.deadline(), 30, 30,
+                        UnallocatedReason.INSUFFICIENT_CAPACITY)));
+        String valid = plans.encode(partial);
+        String remainder = "UNALLOCATED|1|2026-10-05T10:00|30|30|INSUFFICIENT_CAPACITY|Draft\n";
+        for (String invalid : List.of(valid.replace("|15\n", "|30\n"),
+                valid.replace("|1|1|0\n", "|1|2|0\n") + remainder,
+                valid.replace("|1|1|0\n", "|1|0|0\n").replace(remainder, ""),
+                valid.replace("2026-10-05T07:00", "2026-10-05T08:01"),
+                valid.replace("2026-10-05T08:00|2026-10-05T08:30", "2026-10-05T10:00|2026-10-05T10:30"),
+                valid.replace("|1|1|0\n", "|2|1|0\n").replace(remainder,
+                        "SESSION|1|2026-10-05T08:00|2026-10-05T08:30|15\n" + remainder))) {
+            assertTrue(assertThrows(StorageException.class, () -> plans.decode(invalid)).getCause()
+                    instanceof ValidationException);
+            assertThrows(StorageException.class, () -> snapshots.decode(invalid));
+        }
+        Plan missingWork = new Plan(NOW, TimeRules.horizonEnd(NOW), source, List.of(), List.of());
+        assertTrue(assertThrows(StorageException.class, () -> plans.encode(missingWork)).getCause()
+                instanceof ValidationException);
+        assertEquals(partial, plans.decode(valid));
+    }
+
+    @Test
+    void encodeAndDecode_nonGreedyFrozenPlan_preservesFeasibleAllocation() throws StorageException {
+        Snapshot source = new Snapshot(List.of(new Task(1, "Draft", NOW.withHour(12), 45)), List.of(), 2, 1);
+        Plan alternative = new Plan(NOW, TimeRules.horizonEnd(NOW), source,
+                List.of(new StudySession(1, NOW.withHour(10), NOW.withHour(11), 45)), List.of());
+        assertEquals(alternative, plans.decode(plans.encode(alternative)));
     }
 
     @Test

@@ -26,7 +26,12 @@ I implemented the deadline-aware planner and daily schedule projection, then ext
 
 For issue [#48](https://github.com/AY2627S1-CS2113-T10-1/tp/issues/48), I added fixed-time planner and projection tests for blocking study time with an ordinary one-time commitment. The tests and UI acceptance notes cover replanning around the block, loss of deadline capacity and the effects of deleting or restoring the commitment. See [PR #82](https://github.com/AY2627S1-CS2113-T10-1/tp/pull/82) and the [unavailable-period test plan](../../test/ui-test-plan.md).
 
-I also documented a proposed contract for multi-date unavailable commands. That console workflow remains explicitly planned rather than fully wired; see the [Developer Guide handoff](../DeveloperGuide.md#multi-date-unavailable-periods-implementation-handoff-planned).
+<!-- @@author GabrielYuSP -->
+I also documented the proposed multi-date unavailable contract. Darren's later
+dispatcher integration now makes both modes available; see the
+[implemented transaction](../DeveloperGuide.md#multi-date-unavailable-periods).
+My planning contribution remains distinct from his command execution work.
+<!-- @@author -->
 
 ### Documentation
 

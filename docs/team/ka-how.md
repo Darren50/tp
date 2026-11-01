@@ -1,5 +1,17 @@
 # Koh Ka How - Project Portfolio Page
 
+<!-- @@author ka-how -->
+The final release review adds both implemented unavailable modes to command
+help and the User Guide reference, removes stale coming-soon text, and adds
+UI-035 plus production-entry-point and packaged tests for impossible saved
+work. The latter checks status 1, no prompt, quiet stderr and preserved bytes;
+valid frozen restart cases remain active. Storage feasibility rules and codec
+integration retain Gabriel's and Ernest's component ownership. The tracked
+guide PDFs are exported from the corrected Markdown with portable cross-guide
+links and visually reviewed storage diagrams. Local verification and platform
+limits are in the [release review](../release/nickpatt-release-review.md).
+<!-- @@author -->
+
 ## Overview
 
 ScheduleFlow is a Java 25 command-line application that helps university students
