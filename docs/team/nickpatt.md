@@ -49,9 +49,9 @@ task/parser behavior change.
   covers supported command families and both unavailable modes. The release audit
   adds explicit rejection coverage for domain-only task APIs at the console.
 
-These tests use fixed times and independent immutable inputs. Verification
-results and remaining release dependencies are recorded in the
-[task/parser release review](../release/nickpatt-release-review.md).
+These tests use fixed times and independent immutable inputs. See
+[task/parser verification](../DeveloperGuide.md#taskparser-validation-and-junitdocumentation-conventions)
+for coverage and test commands.
 
 ### Documentation and diagrams
 

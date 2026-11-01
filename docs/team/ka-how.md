@@ -8,8 +8,8 @@ work. The latter checks status 1, no prompt, quiet stderr and preserved bytes;
 valid frozen restart cases remain active. Storage feasibility rules and codec
 integration retain Gabriel's and Ernest's component ownership. The tracked
 guide PDFs are exported from the corrected Markdown with portable cross-guide
-links and visually reviewed storage diagrams. Local verification and platform
-limits are in the [release review](../release/nickpatt-release-review.md).
+links and visually reviewed storage diagrams. Verification commands and platform
+limits are in the [Developer Guide](../DeveloperGuide.md#build-packaging-and-console-verification).
 <!-- @@author -->
 
 ## Overview

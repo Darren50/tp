@@ -169,8 +169,8 @@ cover their confirmations, rejection and restarts.
 <!-- @@author nickpatt -->
 **Candidate scope:** the Task sections describe the current source and its
 task/parser regression tests, not the published v1.0 JAR. Build this checkout
-when verifying the candidate; the [release review](release/nickpatt-release-review.md)
-records validation and remaining integration gates. The implementation
+when verifying the candidate; see [task/parser verification](#taskparser-validation-and-junitdocumentation-conventions)
+for coverage and test commands. The implementation
 explanation concerns the Task lifecycle enhancement; the later whole-file
 allocation also assigns the complete parser to Nickhil, but does not establish
 who originally wrote every parser or integration method.
@@ -1989,8 +1989,17 @@ commands; its 18:00 deadline must be within the allowed calendar-year range.
 3. Repeat with an extra `BROKEN` line appended to the restored plan file. Expect
    a saved-plan validation error before the prompt and unchanged invalid bytes.
    Restore the backup again. Exact wording depends on which plan row/count fails.
-   Also try the complete impossible-work fixture in the
-   [storage handoff](release/ernest-storage-handoff.md#packaged-corrupt-plan-example-for-ka-how).
+   Also try an impossible-work fixture: replace B's `data/scheduleflow.txt`
+   with these UTF-8 rows, retaining the final newline:
+
+   ```text
+   SCHEDULEFLOW|6
+   NEXT|2|1|1
+   TASK2|1|2026-10-06T18:00|30|NORMAL|Draft
+   PLAN|2026-10-05T07:00|2027-10-05T00:00|1|0|0
+   SESSION|1|2026-10-05T08:00|2026-10-05T09:00|60
+   ```
+
    Its real task ID and valid interval must still fail with
    `Error: Invalid saved plan: Scheduled work plus remainder must equal source remaining work.`,
    status 1, no prompt and unchanged bytes. Restore the backup afterward.
