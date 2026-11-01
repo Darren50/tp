@@ -18,6 +18,7 @@ Service -> Service ++ : createEdit(source, id, name, day, start,\nminutes, start
 note right of Service
   Find original; resolve omitted fields.
   Construct and validate the replacement Commitment.
+  Retain applicable skipped dates (helper omitted).
   Record creation and source accessors are omitted.
 end note
 Service -> Service ++ : rejectOverlaps(edited, otherCommitments)
