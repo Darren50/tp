@@ -1,0 +1,82 @@
+/* @@author ernestgoh-god */
+/* Styles are scoped to the landing page so the guides keep their existing layout. */
+.container-lg:has(> .sf-home) { max-width: 1100px; }
+/* The default Pages theme also inserts a repository-name heading. */
+.container-lg:has(> .sf-home) > h1:first-child { display: none; }
+.sf-home {
+  --sf-ink: #173d42;
+  --sf-muted: #4d6467;
+  --sf-accent: #07685c;
+  color: var(--sf-ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.65;
+  margin: 0 auto;
+  max-width: 1080px;
+}
+.sf-home * { box-sizing: border-box; }
+.sf-home h1, .sf-home h2, .sf-home h3 {
+  border: 0;
+  color: var(--sf-ink);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+  padding: 0;
+}
+.sf-home a { color: var(--sf-accent); }
+.sf-home a:focus-visible { outline: 3px solid #a35c00; outline-offset: 5px; }
+.sf-hero {
+  background: #f0f6f3;
+  border-radius: 24px;
+  margin: 24px 0 32px;
+  padding: 56px 48px 40px;
+}
+.sf-home .sf-eyebrow {
+  color: var(--sf-accent);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  margin: 0 0 20px;
+}
+.sf-home .sf-brand { color: var(--sf-ink); font-size: 20px; font-weight: 700; margin: 0 0 20px; }
+.sf-home h1 { font-size: clamp(38px, 6vw, 64px); margin: 0 0 24px; }
+.sf-intro { color: var(--sf-muted); font-size: 20px; max-width: 640px; }
+.sf-actions { align-items: center; display: flex; flex-wrap: wrap; gap: 18px 24px; margin: 28px 0 20px; }
+.sf-home .sf-button {
+  background: var(--sf-accent);
+  border: 2px solid var(--sf-accent);
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 650;
+  padding: 11px 20px;
+  text-decoration: none;
+}
+.sf-home .sf-button:hover { background: #064e46; border-color: #064e46; }
+.sf-secondary { font-weight: 650; text-underline-offset: 4px; }
+.sf-home .sf-details { color: var(--sf-muted); font-size: 13px; margin: 0; }
+.sf-home .sf-preview { margin: 0 0 64px; }
+.sf-preview img { border: 1px solid #cad8d4; border-radius: 16px; display: block; height: auto; max-width: 100%; width: 100%; }
+.sf-preview figcaption { color: var(--sf-muted); font-size: 13px; margin: 12px 8px 0; max-width: 760px; }
+.sf-home h2 { font-size: clamp(27px, 4vw, 36px); margin: 0 0 28px; }
+.sf-cards { display: grid; gap: 24px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.sf-cards article { border-top: 2px solid #c4d7cc; padding: 24px 0 8px; }
+.sf-step { color: var(--sf-accent); font-size: 14px; font-weight: 700; }
+.sf-home h3 { font-size: 21px; margin: 16px 0 12px; }
+.sf-cards p, .sf-save p { color: var(--sf-muted); margin: 0; }
+.sf-save { background: #f0f6f3; border-left: 4px solid var(--sf-accent); border-radius: 0 12px 12px 0; margin: 48px 0 56px; padding: 28px 32px; }
+.sf-save h2 { font-size: 25px; margin-bottom: 12px; }
+.sf-resources { display: grid; gap: 0 32px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.sf-resources h2 { grid-column: 1 / -1; }
+.sf-resources a { border-top: 1px solid #d6e0db; padding: 20px 0; text-decoration: none; }
+.sf-resources a:hover strong { text-decoration: underline; text-underline-offset: 4px; }
+.sf-resources strong { display: block; font-size: 18px; margin-bottom: 5px; }
+.sf-resources a > span { color: var(--sf-muted); display: block; font-size: 14px; }
+.sf-footer { border-top: 1px solid #d6e0db; font-size: 13px; margin-top: 36px; padding: 24px 0; }
+@media (max-width: 640px) {
+  .sf-hero { border-radius: 16px; padding: 32px 22px; }
+  .sf-intro { font-size: 18px; }
+  .sf-cards, .sf-resources { grid-template-columns: 1fr; }
+  .sf-cards { gap: 12px; }
+  .sf-home .sf-preview { margin-bottom: 40px; }
+  .sf-save { padding: 24px; }
+}
+/* @@author */

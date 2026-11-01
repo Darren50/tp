@@ -1,146 +1,69 @@
-<!-- @@author nickpatt -->
-# ScheduleFlow
+---
+title: ScheduleFlow
+permalink: /
+description: Turn coursework deadlines and fixed commitments into a study plan you can follow.
+---
 
-ScheduleFlow is a Java 25 command-line application for university students who
-want to manage coursework tasks, fixed commitments, and study plans.
+<!-- @@author ernestgoh-god -->
+<link rel="stylesheet" href="assets/css/home.css">
 
-It allocates available study time in 30-minute slots according to task deadlines,
-reports work that cannot fit before its deadline, and saves successful changes
-automatically. Task work remains exact even when its reserved capacity is rounded
-up to a whole slot.
+<div class="sf-home">
+  <header class="sf-hero">
+    <p class="sf-eyebrow">YOUR COURSEWORK. A CLEARER PLAN.</p>
+    <p class="sf-brand">ScheduleFlow</p>
+    <h1>Make time for<br>what is due next.</h1>
+    <p class="sf-intro">ScheduleFlow turns your coursework tasks and fixed commitments into a study schedule, right from your terminal.</p>
+    <nav class="sf-actions" aria-label="Get started with ScheduleFlow">
+      <a class="sf-button" href="QuickStart.html">Get started <span aria-hidden="true">&rarr;</span></a>
+      <a class="sf-secondary" href="UserGuide.html">Read the User Guide</a>
+    </nav>
+    <p class="sf-details">Java 25 &middot; Local saved data &middot; Command-line application</p>
+  </header>
 
-## Current implementation
+  <figure class="sf-preview">
+    <a href="images/Ui.png" aria-label="View the ScheduleFlow example at full size"><img src="images/Ui.png" width="1440" height="840" alt="ScheduleFlow terminal showing a saved Saturday schedule: task T1 from 08:00 to 08:30, task T2 from 08:30 to 09:30, a break until 10:00, and free time until 22:00."></a>
+    <figcaption>A saved schedule displayed by ScheduleFlow. Select the image to view it at full size. Example dates and tasks are illustrative; your plan depends on your work and available time.</figcaption>
+  </figure>
 
-The following features are implemented:
+  <section class="sf-workflow" aria-labelledby="sf-workflow-title">
+    <p class="sf-eyebrow">FROM DEADLINES TO A DAILY SCHEDULE</p>
+    <h2 id="sf-workflow-title">Less juggling. More studying.</h2>
+    <div class="sf-cards">
+      <article>
+        <span class="sf-step" aria-hidden="true">01</span>
+        <h3>Capture your workload</h3>
+        <p>Add coursework and remaining-work estimates. Record progress as you go, and keep completed tasks for reference.</p>
+      </article>
+      <article>
+        <span class="sf-step" aria-hidden="true">02</span>
+        <h3>Protect your time</h3>
+        <p>Reserve classes and other commitments. Set study hours, block unavailable periods, and configure session limits and breaks.</p>
+      </article>
+      <article>
+        <span class="sf-step" aria-hidden="true">03</span>
+        <h3>See what fits</h3>
+        <p>Generate a plan that allocates work by earliest deadline. View your daily schedule and see which work could not fit.</p>
+      </article>
+    </div>
+  </section>
 
-- Add, edit, list, and delete coursework tasks, preserving stable IDs.
-- Record minute/session progress, revise estimates, retain completed tasks and
-  reopen them with an explicit estimate.
-- Add, list, and stop weekly task templates with saved occurrence-generation history.
-- Add, edit, skip, list, and delete weekly/bounded commitments, and manage one-time
-  commitments and continuous/daily unavailable periods.
-- Configure weekday study hours, date overrides and optional work/break settings.
-- Generate an earliest-deadline-first study plan.
-- View today's schedule or a schedule for a specific date.
-- Report unallocated work and the reason it could not be scheduled.
-- Persist tasks, commitments, templates, settings, ID counters and frozen plans
-  in `data/scheduleflow.txt`.
-- Restore saved data when the application starts.
-- Preserve state when validation or saving fails.
-- Run with UTF-8 console input and output.
-- Package the application as an executable Shadow JAR.
+  <aside class="sf-save" aria-label="Automatic saving">
+    <h2>Pick up where you left off.</h2>
+    <p>Successful changes and generated plans save automatically. Reopen from the same folder to view the same saved schedule. After changing its source data, run <code>plan</code> again.</p>
+  </aside>
 
-Plans and their source data survive restarts without moving sessions. Successful
-source changes clear the saved plan; rejected commands and recognized no-ops
-preserve it. Run `plan` again after a change to schedule the revised work.
+  <nav class="sf-resources" aria-label="Project resources">
+    <h2>Find your next step</h2>
+    <a href="QuickStart.html"><strong>Quick start <span aria-hidden="true">&rarr;</span></strong><span>Install Java, launch the app, and try your first commands.</span></a>
+    <a href="UserGuide.html"><strong>User Guide <span aria-hidden="true">&rarr;</span></strong><span>Explore commands, examples, and troubleshooting.</span></a>
+    <a href="DeveloperGuide.html"><strong>Developer Guide <span aria-hidden="true">&rarr;</span></strong><span>Understand the design, build setup, and testing.</span></a>
+    <a href="AboutUs.html"><strong>Meet the team <span aria-hidden="true">&rarr;</span></strong><span>The people behind ScheduleFlow.</span></a>
+  </nav>
 
-## User documentation
-
-- [User Guide](UserGuide.md) — installation, commands, examples, scheduling
-  rules, persistence, and troubleshooting.
-- [Developer Guide](DeveloperGuide.md) — architecture, implementation details,
-  design decisions, testing, and release verification.
-- [About Us](AboutUs.md) — project team information.
-
-## Quick start
-
-The project requires Java 25.
-
-From the repository root, run:
-
-```shell
-java -version
-./gradlew --version
-./gradlew build
-```
-
-On Windows, use:
-
-```powershell
-java -version
-.\gradlew.bat --version
-.\gradlew.bat build
-```
-
-The executable JAR is produced at:
-
-```text
-build/libs/scheduleflow.jar
-```
-
-Launch it from a dedicated folder:
-
-```shell
-java -ea -jar scheduleflow.jar
-```
-
-The application stores data relative to the launch folder at:
-
-```text
-data/scheduleflow.txt
-```
-
-## Supported commands
-
-Use `help` for syntax, `task` commands for coursework and weekly templates,
-`commitment` commands for fixed events, and `unavailable continuous` or
-`unavailable daily` for multiple dates. Use `hours` and `policy` to configure
-availability and rest, `plan` to generate a saved plan, `schedule` to view it,
-and `exit` to close the application. See the
-[complete command summary](UserGuide.md#command-summary) for exact field order,
-examples and restrictions.
-
-Ordinary task estimates, progress and reopening use exact whole minutes;
-creation/reopening require positive values. Commitments and weekly template
-estimates require positive multiples of 30. Study hours default to 08:00–22:00
-every day; weekday and date-specific overrides can change them. Work/break
-limits apply when a policy is configured. Allocation slots remain 30 minutes.
-
-## Testing
-
-Run the Java build, tests, and Checkstyle with:
-
-```shell
-./gradlew build
-```
-
-Run the maintained process-level UI scenarios with Node.js 22 or later:
-
-```shell
-node --test test/ui-runner.test.mjs
-node .agents/skills/test-ui/scripts/run-ui-tests.mjs
-node --test test/release.test.mjs
-```
-
-The UI scenarios run the packaged application in isolated temporary folders and
-cover startup, persistence, restart behavior, validation errors, Unicode data,
-ID handling, partial plans, and release packaging.
-
-See the [UI test plan](../test/ui-test-plan.md) for the complete scenario list
-and verification protocol.
-
-## Project structure
-
-```text
-src/main/java/scheduleflow/
-├── cli/          Command parsing, dispatch, application lifecycle, and rendering
-├── common/       Shared input validation and validation exceptions
-├── commitment/   Recurring commitment operations
-├── model/       Immutable tasks, commitments, and snapshots
-├── planning/    Study-plan generation and daily schedule projection
-├── storage/     UTF-8 persistence and atomic file replacement
-└── task/        Coursework task operations
-
-src/test/java/   JUnit 5 tests mirroring the production packages
-test/             Node.js process/UI tests and scenario fixtures
-docs/             User, developer, and team documentation
-```
-
-The application starts at `scheduleflow.Main`. The command-line layer parses and
-dispatches commands to the task, commitment, planning, and storage components.
-Mutating operations create candidate snapshots, save them first, and publish
-them only after persistence succeeds.
-
-For repository conventions and contribution instructions, see
-[AGENTS.md](../AGENTS.md).
+  <footer class="sf-footer">
+    <a href="https://github.com/AY2627S1-CS2113-T10-1/tp">Source code on GitHub</a>
+    <span aria-hidden="true"> &middot; </span>
+    <a href="https://github.com/AY2627S1-CS2113-T10-1/tp/releases">Releases</a>
+  </footer>
+</div>
 <!-- @@author -->
